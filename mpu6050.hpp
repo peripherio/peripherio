@@ -19,19 +19,19 @@ public:
   }
 
   mpu6050(std::uint8_t bus, std::uint8_t address) : interface(interface::i2c(bus, address)) {
-    this->interface.write(this->PWR_MGMT_1, 0x00);
+    this->interface.write(PWR_MGMT_1, 0x00);
   }
 
   std::uint16_t get_temp() {
-    auto const raw_temp = this->read_word(this->TEMP_OUT0);
+    auto const raw_temp = this->read_word(TEMP_OUT0);
     auto const actual_temp = (raw_temp / 340.0) + 36.53;
     return actual_temp;
   }
 
   std::optional<std::tuple<double, double, double>> get_accel_data() {
-    auto x = this->interface.read(this->ACCEL_XOUT0);
-    auto y = this->interface.read(this->ACCEL_YOUT0);
-    auto z = this->interface.read(this->ACCEL_ZOUT0);
+    auto x = this->interface.read(ACCEL_XOUT0);
+    auto y = this->interface.read(ACCEL_YOUT0);
+    auto z = this->interface.read(ACCEL_ZOUT0);
 
     auto const accel_range = this->read_accel_range();
 
@@ -44,9 +44,9 @@ public:
     y /= accel_scale_modifier;
     z /= accel_scale_modifier;
 
-    x *= this->GRAVITY_MS2;
-    y *= this->GRAVITY_MS2;
-    z *= this->GRAVITY_MS2;
+    x *= GRAVITY_MS2;
+    y *= GRAVITY_MS2;
+    z *= GRAVITY_MS2;
     return std::make_tuple(x, y, z);
   }
 
@@ -65,12 +65,12 @@ private:
   }
 
   void set_accel_range(std::uint8_t accel_range) {
-    this->interface.write(this->ACCEL_CONFIG, 0x00);
-    this->interface.write(this->ACCEL_CONFIG, accel_range);
+    this->interface.write(ACCEL_CONFIG, 0x00);
+    this->interface.write(ACCEL_CONFIG, accel_range);
   }
 
   std::optional<uint8_t> read_accel_range(bool raw=false) {
-    auto const raw_data = this->interface.read(this->ACCEL_CONFIG);
+    auto const raw_data = this->interface.read(ACCEL_CONFIG);
 
     if(raw)
       return raw_data;
