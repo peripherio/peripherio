@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <utility>
+#include <optional>
 #include <bitset>
 
 #include "i2c.hpp"
@@ -8,7 +9,7 @@ namespace rami::driver {
 
 class pca9685 {
 public:
-  static std::uint8_t detect(std::uint8_t bus) {
+  static std::optional<std::uint8_t> detect(std::uint8_t bus) {
     return interface::i2c::find(bus, [](interface::i2c&& i2c) {
         return i2c.get_address() == 0x40;
     });

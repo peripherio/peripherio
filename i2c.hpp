@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <optional>
+
 #include <cstdlib>
 #include <unistd.h>
 
@@ -14,7 +16,7 @@ class i2c {
 public:
 
   template<typename Predicate>
-  static std::uint8_t find(std::uint8_t bus, Predicate pred) {
+  static std::optional<std::uint8_t> find(std::uint8_t bus, Predicate pred) {
     auto const dev = "/dev/i2c-" + std::to_string(bus);
     int fd;
     if ((fd = ::open(dev.c_str(), O_RDWR)) < 0) {
@@ -32,7 +34,7 @@ public:
         continue;
       }
     }
-    return 0;
+    return std::nullopt;
   }
 
   i2c(std::uint8_t bus, std::uint8_t address) : bus(bus), address(address) {

@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <utility>
 #include <bitset>
+#include <optional>
 
 #include "i2c.hpp"
 
@@ -10,7 +11,7 @@ class mpu6050 {
 public:
   static std::uint8_t const default_address = 0x68;
 
-  static std::uint8_t detect(std::uint8_t bus) {
+  static std::optional<std::uint8_t> detect(std::uint8_t bus) {
     return interface::i2c::find(bus, [](interface::i2c&& i2c) {
         auto const who_am_i = i2c.read(0x75);
         return who_am_i == 0b01101000;
@@ -27,17 +28,17 @@ public:
     return actual_temp;
   }
 
-  std::tuple<double, double, double> get_accel_data() {
+  std::optional<std::tuple<double, double, double>> get_accel_data() {
     auto x = this->interface.read(this->ACCEL_XOUT0);
     auto y = this->interface.read(this->ACCEL_YOUT0);
     auto z = this->interface.read(this->ACCEL_ZOUT0);
 
     auto const accel_range = this->read_accel_range();
 
-    if(accel_range == -1)
-      return std::make_tuple(-1, -1, -1);
+    if(!accel_range)
+      return std::nullopt;
 
-    auto const accel_scale_modifier = 32768.0 / accel_range;
+    auto const accel_scale_modifier = 32768.0 / *accel_range;
 
     x /= accel_scale_modifier;
     y /= accel_scale_modifier;
@@ -68,7 +69,7 @@ private:
     this->interface.write(this->ACCEL_CONFIG, accel_range);
   }
 
-  std::uint8_t read_accel_range(bool raw=false) {
+  std::optional<uint8_t> read_accel_range(bool raw=false) {
     auto const raw_data = this->interface.read(this->ACCEL_CONFIG);
 
     if(raw)
@@ -76,16 +77,16 @@ private:
 
 
     switch(raw_data) {
-      case this->ACCEL_RANGE_2G:
+      case ACCEL_RANGE_2G:
         return 2;
-      case this->ACCEL_RANGE_4G:
+      case ACCEL_RANGE_4G:
         return 4;
-      case this->ACCEL_RANGE_8G:
+      case ACCEL_RANGE_8G:
         return 8;
-      case this->ACCEL_RANGE_16G:
+      case ACCEL_RANGE_16G:
         return 16;
       default:
-        return -1;
+        return std::nullopt;
     }
   }
 
