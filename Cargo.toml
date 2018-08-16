@@ -11,6 +11,7 @@ path = "examples/client/client.rs"
 [dependencies]
 futures = "0.1.23"
 protobuf = "2.0.4"
+libloading = "0.5.0"
 toml = "0.4.6"
 grpcio = "0.3"
 
