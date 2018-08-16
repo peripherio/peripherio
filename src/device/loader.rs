@@ -1,4 +1,7 @@
 use device::libloading::Library;
+use error::LibraryNotFoundError;
+
+use failure::Error;
 
 use std::env;
 use std::path::{Path, PathBuf};
