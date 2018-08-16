@@ -2,5 +2,10 @@
 name = "rami"
 version = "0.1.0"
 authors = ["coord.e <me@coord-e.com>"]
+build = "build.rs"
 
 [dependencies]
+grpcio = "0.3"
+
+[build-dependencies]
+protoc-grpcio = "0.1.1"
