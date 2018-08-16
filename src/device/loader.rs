@@ -1,4 +1,4 @@
-use device::libloading::Library;
+use device::libloading::{Library, Symbol};
 use error::LibraryNotFoundError;
 
 use failure::Error;
@@ -29,5 +29,9 @@ impl Loader {
 
     pub fn path(&self) -> &PathBuf {
         &self.path
+    }
+
+    pub unsafe fn get<'lib, T: 'lib>(&'lib self, name: &str) -> Result<Symbol<'lib, T>, Error> {
+        self.lib.get(name.as_bytes()).map_err(|e| e.into())
     }
 }
