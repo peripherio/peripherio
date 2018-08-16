@@ -5,7 +5,9 @@ authors = ["coord.e <me@coord-e.com>"]
 build = "build.rs"
 
 [dependencies]
+futures = "0.1.23"
+protobuf = "2.0.4"
 grpcio = "0.3"
 
 [build-dependencies]
-protoc-grpcio = "0.1.1"
+protoc-grpcio = "0.2.0"
