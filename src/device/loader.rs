@@ -13,7 +13,7 @@ pub struct Loader {
 
 impl Loader {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
-        env::var("RAMIPATH").as_ref().map(|val| val.split(';').collect()).unwrap_or(vec![])
+        env::var("RAMI_PKG_PATH").as_ref().map(|val| val.split(';').collect()).unwrap_or(vec![])
             .iter()
             .map(|path| Path::new(path).join(name).with_extension("so"))
             .find(|path| path.exists()).ok_or(LibraryNotFoundError{name: name.to_owned()}.into())
