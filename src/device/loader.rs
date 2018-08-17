@@ -15,8 +15,9 @@ impl Loader {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
         env::var("RAMI_PKG_PATH").as_ref().map(|val| val.split(';').collect()).unwrap_or(vec![])
             .iter()
-            .map(|path| Path::new(path).join(name).with_extension("so"))
-            .find(|path| path.exists()).ok_or(LibraryNotFoundError{name: name.to_owned()}.into())
+            .map(|path| Path::new(path).join(name).join("rami.toml"))
+            .find(|path| path.is_file()).and_then(|path| path.parent())
+            .ok_or(LibraryNotFoundError{name: name.to_owned()}.into())
     }
 
     pub fn new(name: &str) -> Result<Self, Error> {
