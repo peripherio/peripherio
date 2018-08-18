@@ -8,7 +8,20 @@ use std::path::{Path, PathBuf};
 
 pub struct Loader {
     path: PathBuf,
-    lib: Library
+    name: String,
+    version: String,
+    author: Option<String>,
+    category: Vec<Category>,
+    driver: Library
+}
+
+#[derive(Deserialize)]
+struct LibMetaData {
+    name: String,
+    version: String,
+    author: Option<String>,
+    category: Vec<String>,
+    driver: Option<String>
 }
 
 impl Loader {
@@ -22,9 +35,19 @@ impl Loader {
 
     pub fn new(name: &str) -> Result<Self, Error> {
         let path = Self::resolve(name)?;
+        let file = File::open(filename)?;
+        let mut contents = String::new();
+        f.read_to_string(&mut contents)?;
+        let metadata: LibMetaData = toml::from_str(contents)?;
+
+        let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
+        let category = metadata.category.map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
         Ok(Loader {
             path: path.clone(),
-            lib: Library::new(path)?
+            driver: Library::new(path.join(driver_file))?,
+            name: metadata.name,
+            author: metadata.author,
+            category
         })
     }
 
@@ -33,6 +56,6 @@ impl Loader {
     }
 
     pub unsafe fn get<'lib, T: 'lib>(&'lib self, name: &str) -> Result<Symbol<'lib, T>, Error> {
-        self.lib.get(name.as_bytes()).map_err(|e| e.into())
+        self.driver.get(name.as_bytes()).map_err(|e| e.into())
     }
 }
