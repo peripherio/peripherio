@@ -9,7 +9,7 @@ option objc_class_prefix = "RMP";
 
 package rami;
 
-service RamiService {
+service Rami {
   /* Device management calls */
   rpc List(Config) returns (FindResponse) {}
   rpc Find(FindRequest) returns (FindResponse) {}

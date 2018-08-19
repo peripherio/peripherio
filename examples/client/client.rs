@@ -17,7 +17,7 @@ extern crate rami;
 use std::sync::Arc;
 
 use grpcio::{ChannelBuilder, EnvBuilder};
-use rami::protos::hello::HelloRequest;
+use rami::protos::main::HelloRequest;
 use rami::protos::hello_grpc::GreeterClient;
 
 fn main() {
