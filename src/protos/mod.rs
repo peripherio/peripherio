@@ -1,2 +1,2 @@
-pub mod hello;
-pub mod hello_grpc;
+pub mod main;
+pub mod main_grpc;
