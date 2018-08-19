@@ -41,7 +41,7 @@ impl Loader {
 
     pub fn new(name: &str) -> Result<Self, Error> {
         let path = Self::resolve(name)?;
-        let file = File::open(path)?;
+        let mut file = File::open(&path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let metadata: LibMetaData = toml::from_str(&contents)?;
