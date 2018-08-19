@@ -1,12 +1,10 @@
 use device::category::Category;
-
 use device::libloading::{Library, Symbol};
-use toml;
-use error::LibraryNotFoundError;
+use resolve::resolve;
 
+use toml;
 use failure::Error;
 
-use std::env;
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
@@ -31,12 +29,7 @@ struct LibMetaData {
 
 impl Loader {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
-        env::var("RAMI_PKG_PATH").as_ref().map(|val| val.split(';').collect()).unwrap_or(vec![])
-            .iter()
-            .map(|path| Path::new(path).join(name).join("rami.toml"))
-            .find(|path| path.is_file()).as_ref().and_then(|path| path.parent())
-            .map(|path| path.to_path_buf())
-            .ok_or(LibraryNotFoundError{name: name.to_owned()}.into())
+        resolve(name, "RAMI_PKG_PATH", "rami.toml")
     }
 
     pub fn new(name: &str) -> Result<Self, Error> {
