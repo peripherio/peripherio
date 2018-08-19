@@ -51,6 +51,10 @@ impl Loader {
         })
     }
 
+    pub fn validate(&self) -> bool {
+        self.category.iter().flat_map(|ctg| ctg.required_symbols().iter()).all(|sym| unsafe { self.get::<fn(u32) -> u32>(sym) }.is_ok())
+    }
+
     pub fn path(&self) -> &PathBuf {
         &self.path
     }
