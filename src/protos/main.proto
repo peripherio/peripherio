@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 option java_multiple_files = true;
 option java_package = "com.y-modify.rami.proto";
 option java_outer_classname = "RamiProto";
@@ -7,5 +9,55 @@ option objc_class_prefix = "RMP";
 
 package rami;
 
+service RamiService {
+  /* Device management calls */
+  rpc List(Config) returns (FindResponse) {}
+  rpc Find(FindRequest) returns (FindResponse) {}
+  rpc PingDevice(PingRequest) returns (PingResponse) {}
+}
 
+message PingResponse {
+  bool alive = 1;
+}
 
+message FindRequest {
+  Config config = 1;
+  DeviceSpecification spec = 2;
+}
+
+message PingRequest {
+  Config config = 1;
+  Device device = 2;
+}
+
+message FindResponse {
+  repeated Device results = 1;
+}
+
+message Config {
+  message I2C {
+    int32 bus = 1;
+    int32 speed = 2;
+  }
+  message SPI {
+    int32 bus = 1;
+    int32 speed = 2;
+    int32 cs_pin = 3;
+  }
+  I2C i2c = 1;
+  SPI spi = 2;
+}
+
+message Device {
+  // Maybe int32?
+  string id = 1;
+  string display_name = 2;
+  int32 priority = 3;
+}
+
+message DeviceSpecification {
+  string category = 1;
+  string vendor = 2;
+  bool is_real = 3;
+  bytes additional_options = 4; // msgpack...
+}
