@@ -1,15 +1,3 @@
-// Copyright 2017 PingCAP, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// See the License for the specific language governing permissions and
-
 #![allow(unknown_lints)]
 #![allow(unreadable_literal)]
 
@@ -25,17 +13,36 @@ use futures::sync::oneshot;
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
-use rami::protos::hello::{HelloReply, HelloRequest};
-use rami::protos::hello_grpc::{self, Greeter};
+use rami::protos::main::*;
+use rami::protos::main_grpc::{self, Rami};
 
 #[derive(Clone)]
-struct GreeterService;
+struct RamiService;
 
-impl Greeter for GreeterService {
-    fn say_hello(&self, ctx: RpcContext, req: HelloRequest, sink: UnarySink<HelloReply>) {
-        let msg = format!("Hello {}", req.get_name());
-        let mut resp = HelloReply::new();
-        resp.set_message(msg);
+impl Rami for RamiService {
+    fn list(&self, ctx: RpcContext, req: Config, sink: UnarySink<FindResponse>) {
+        let device = Device::new();
+        let mut resp = FindResponse::new();
+        resp.mut_results().push(device);
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
+
+    fn find(&self, ctx: RpcContext, req: FindRequest, sink: UnarySink<FindResponse>) {
+        let device = Device::new();
+        let mut resp = FindResponse::new();
+        resp.mut_results().push(device);
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
+
+    fn ping_device(&self, ctx: RpcContext, req: PingRequest, sink: UnarySink<PingResponse>) {
+        let mut resp = PingResponse::new();
+        resp.set_alive(true);
         let f = sink
             .success(resp)
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
@@ -45,7 +52,7 @@ impl Greeter for GreeterService {
 
 fn main() {
     let env = Arc::new(Environment::new(1));
-    let service = hello_grpc::create_greeter(GreeterService);
+    let service = main_grpc::create_rami(RamiService);
     let mut server = ServerBuilder::new(env)
         .register_service(service)
         .bind("127.0.0.1", 50051)
