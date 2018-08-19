@@ -34,7 +34,7 @@ impl Loader {
         env::var("RAMI_PKG_PATH").as_ref().map(|val| val.split(';').collect()).unwrap_or(vec![])
             .iter()
             .map(|path| Path::new(path).join(name).join("rami.toml"))
-            .find(|path| path.is_file()).and_then(|path| path.parent())
+            .find(|path| path.is_file()).as_ref().and_then(|path| path.parent())
             .map(|path| path.to_path_buf())
             .ok_or(LibraryNotFoundError{name: name.to_owned()}.into())
     }
