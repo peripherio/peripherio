@@ -28,8 +28,12 @@ struct LibMetaData {
 }
 
 impl Loader {
+    pub fn resolve(name: &str) -> Result<PathBuf, Error> {
+        resolve(name, "RAMI_PKG_PATH", "rami.toml")
+    }
+
     pub fn new(name: &str) -> Result<Self, Error> {
-        let path = resolve(name, "RAMI_PKG_PATH", "rami.toml")?;
+        let path = Self::resolve(name)?;
         let mut file = File::open(&path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
