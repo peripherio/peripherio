@@ -17,16 +17,15 @@ extern crate rami;
 use std::sync::Arc;
 
 use grpcio::{ChannelBuilder, EnvBuilder};
-use rami::protos::main::HelloRequest;
-use rami::protos::hello_grpc::GreeterClient;
+use rami::protos::main::*;
+use rami::protos::main_grpc::RamiClient;
 
 fn main() {
     let env = Arc::new(EnvBuilder::new().build());
     let ch = ChannelBuilder::new(env).connect("localhost:50051");
-    let client = GreeterClient::new(ch);
+    let client = RamiClient::new(ch);
 
-    let mut req = HelloRequest::new();
-    req.set_name("world".to_owned());
-    let reply = client.say_hello(&req).expect("rpc");
-    println!("Greeter received: {}", reply.get_message());
+    let mut req = Config::new();
+    let reply = client.list(&req).expect("rpc");
+    println!("Greeter received: {:?}", reply.get_results());
 }
