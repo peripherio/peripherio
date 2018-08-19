@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.y-modify.rami.proto";
+option java_outer_classname = "RamiProto";
+option objc_class_prefix = "RMP";
+
+package rami;
+
+
+
