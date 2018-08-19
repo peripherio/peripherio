@@ -5,6 +5,7 @@ pub mod error;
 extern crate futures;
 extern crate grpcio;
 extern crate protobuf;
+extern crate toml;
 
 #[macro_use]
 extern crate failure;
