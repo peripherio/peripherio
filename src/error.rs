@@ -1,5 +1,5 @@
 #[derive(Fail, Debug)]
-#[fail(display = "Library not found: {}", name)]
-pub struct LibraryNotFoundError {
+#[fail(display = "Cannot resolve name {}", name)]
+pub struct CannotResolveError {
     pub name: String
 }

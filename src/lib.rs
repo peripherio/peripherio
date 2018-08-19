@@ -1,6 +1,7 @@
 pub mod protos;
 pub mod device;
 pub mod error;
+pub mod resolve;
 
 extern crate futures;
 extern crate grpcio;
