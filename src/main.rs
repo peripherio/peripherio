@@ -21,9 +21,28 @@ struct RamiService;
 
 impl Rami for RamiService {
     fn list(&self, ctx: RpcContext, req: Config, sink: UnarySink<FindResponse>) {
-        let mut device = Device::new();
+        let device = Device::new();
         let mut resp = FindResponse::new();
-        resp.mut_resuluts().push(device);
+        resp.mut_results().push(device);
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
+
+    fn find(&self, ctx: RpcContext, req: FindRequest, sink: UnarySink<FindResponse>) {
+        let device = Device::new();
+        let mut resp = FindResponse::new();
+        resp.mut_results().push(device);
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
+
+    fn ping_device(&self, ctx: RpcContext, req: PingRequest, sink: UnarySink<PingResponse>) {
+        let mut resp = PingResponse::new();
+        resp.set_alive(true);
         let f = sink
             .success(resp)
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
