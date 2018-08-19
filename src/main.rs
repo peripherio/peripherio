@@ -52,7 +52,7 @@ impl Rami for RamiService {
 
 fn main() {
     let env = Arc::new(Environment::new(1));
-    let service = hello_grpc::create_greeter(GreeterService);
+    let service = main_grpc::create_rami(RamiService);
     let mut server = ServerBuilder::new(env)
         .register_service(service)
         .bind("127.0.0.1", 50051)
