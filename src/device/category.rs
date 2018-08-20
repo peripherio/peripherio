@@ -38,8 +38,7 @@ impl Category {
         resolve(name, "RAMI_CTG_PATH", "category.toml")
     }
 
-    pub fn new(name: &str) -> Result<Self, Error> {
-        let path = Self::resolve(name)?;
+    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let mut file = File::open(&path.join("category.toml"))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;

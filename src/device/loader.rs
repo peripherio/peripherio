@@ -32,8 +32,7 @@ impl Loader {
         resolve(name, "RAMI_PKG_PATH", "rami.toml")
     }
 
-    pub fn new(name: &str) -> Result<Self, Error> {
-        let path = Self::resolve(name)?;
+    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let mut file = File::open(&path.join("rami.toml"))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
