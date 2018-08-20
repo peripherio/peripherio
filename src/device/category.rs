@@ -40,12 +40,12 @@ impl Category {
     }
 
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let mut file = File::open(&path.join("category.toml"))?;
+        let mut file = File::open(&path.as_ref().join("category.toml"))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let metadata: LibMetaData = toml::from_str(&contents)?;
         Ok(Category {
-            path: path.clone(),
+            path: path.as_ref().to_path_buf(),
             name: metadata.name,
             author: metadata.author,
             version: metadata.version,

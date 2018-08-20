@@ -33,7 +33,7 @@ impl Loader {
     }
 
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let mut file = File::open(&path.join("rami.toml"))?;
+        let mut file = File::open(&path.as_ref().join("rami.toml"))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let metadata: LibMetaData = toml::from_str(&contents)?;
@@ -41,8 +41,8 @@ impl Loader {
         let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
         Ok(Loader {
-            path: path.clone(),
-            driver: Library::new(path.join(driver_file))?,
+            path: path.as_ref().to_path_buf(),
+            driver: Library::new(path.as_ref().join(driver_file))?,
             name: metadata.name,
             author: metadata.author,
             version: metadata.version,
