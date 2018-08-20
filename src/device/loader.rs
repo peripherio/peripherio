@@ -18,6 +18,8 @@ pub struct Loader {
     driver: Library
 }
 
+const COMMON_SYMBOLS: [&str; 2] = ["init", "detect"];
+
 #[derive(Deserialize)]
 struct LibMetaData {
     name: String,
@@ -51,7 +53,9 @@ impl Loader {
     }
 
     pub fn validate(&self) -> bool {
-        self.category.iter().flat_map(|ctg| ctg.required_symbols().iter()).all(|sym| unsafe { self.get::<fn(u32) -> u32>(sym) }.is_ok())
+        self.category.iter().flat_map(|ctg| ctg.required_symbols().iter()).map(AsRef::as_ref)
+            .chain(COMMON_SYMBOLS.into_iter().map(|e|*e))
+            .all(|sym| unsafe { self.get::<fn(u32) -> u32>(sym) }.is_ok())
     }
 
     pub fn path(&self) -> &PathBuf {
