@@ -28,7 +28,8 @@ impl FromStr for Category {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Category::new(s)
+        let path = Category::resolve(s)?;
+        Category::new(path)
     }
 }
 
