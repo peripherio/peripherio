@@ -2,7 +2,7 @@ use device::category::Category;
 use device::libloading::{Library, Symbol};
 use resolve::resolve;
 
-use toml;
+use serde_yaml;
 use failure::Error;
 
 use std::path::{Path, PathBuf};
@@ -38,7 +38,7 @@ impl Loader {
         let mut file = File::open(&path.as_ref().join("rami.toml"))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
-        let metadata: LibMetaData = toml::from_str(&contents)?;
+        let metadata: LibMetaData = serde_yaml::from_str(&contents)?;
 
         let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
