@@ -31,11 +31,11 @@ struct LibMetaData {
 
 impl Loader {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
-        resolve(name, "RAMI_PKG_PATH", "rami.toml")
+        resolve(name, "RAMI_PKG_PATH", "rami.yml")
     }
 
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let mut file = File::open(&path.as_ref().join("rami.toml"))?;
+        let mut file = File::open(&path.as_ref().join("rami.yml"))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let metadata: LibMetaData = serde_yaml::from_str(&contents)?;
