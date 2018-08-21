@@ -6,7 +6,7 @@ pub mod resolve;
 extern crate futures;
 extern crate grpcio;
 extern crate protobuf;
-extern crate toml;
+extern crate serde_yaml;
 
 #[macro_use]
 extern crate failure;
