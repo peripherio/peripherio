@@ -13,7 +13,7 @@ pub fn resolve(name: &str, environ: &'static str, file: &'static str) -> Result<
         .ok_or(CannotResolveError{name: name.to_owned()}.into())
 }
 
-pub fn list_paths(environ: &'static str, file: &'static str) -> Result<impl Iterator<Item=PathBuf>, Error> {
+pub fn paths(environ: &'static str, file: &'static str) -> Result<impl Iterator<Item=PathBuf>, Error> {
     Ok(env::var(environ).as_ref()
         .map(|val| val.split(';').collect()).unwrap_or(vec![])
         .iter()
