@@ -2,11 +2,12 @@ use device::category::Category;
 use device::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
+use config::ConfigValue;
 
 use serde_yaml;
 use serde_json;
 use valico::json_schema::{self, Scope};
-use valico::json_schema::schema::{self, Schema, CompilationSettings};
+use valico::json_schema::schema::{self, ScopedSchema, Schema, CompilationSettings};
 use failure::Error;
 
 use std::path::{Path, PathBuf};
@@ -81,10 +82,18 @@ impl Driver {
         })
     }
 
-    pub fn validate(&self) -> bool {
+    pub fn validate_symbols(&self) -> bool {
         self.category.iter().flat_map(|ctg| ctg.required_symbols().iter()).map(AsRef::as_ref)
             .chain(COMMON_SYMBOLS.into_iter().map(|e|*e))
             .all(|sym| unsafe { self.get::<fn(u32) -> u32>(sym) }.is_ok())
+    }
+
+    pub fn validate_config(&self, key: &str, value: &ConfigValue) -> bool {
+        let scope = Scope::new();
+        self.requires.get(key).and_then(|req| req.schema.as_ref()).map(|schema| {
+            let sschema = ScopedSchema::new(&scope, &schema);
+            sschema.validate(value).is_valid()
+        }).unwrap_or(true)
     }
 
     pub fn path(&self) -> &PathBuf {

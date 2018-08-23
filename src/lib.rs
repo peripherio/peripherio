@@ -1,5 +1,6 @@
 pub mod protos;
 pub mod device;
+pub mod config;
 pub mod error;
 pub mod resolve;
 
