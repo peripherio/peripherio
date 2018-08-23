@@ -13,7 +13,7 @@ pub unsafe fn free(raw: *mut u8, len : usize) {
     let _ = Box::from_raw(s);
 }
 
-pub fn size_of_value(v: Value) -> usize {
+pub fn size_of_value(v: &Value) -> usize {
     match v {
         /*Value::Null => 0, Unsupported */
         Value::Bool(_) => 1, // u8
@@ -33,7 +33,7 @@ pub fn size_of_type(typestr: &str) -> usize {
     }
 }
 
-pub unsafe fn cast_to_ptr(v: Value) -> *const u8 {
+pub unsafe fn cast_to_ptr(v: &Value) -> *const u8 {
     match v {
         /*Value::Null => 0, Unsupported */
         Value::Bool(b) => mem::transmute::<&bool, *const u8>(&b),

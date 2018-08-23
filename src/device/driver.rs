@@ -123,7 +123,7 @@ impl Driver {
             let buf = util::alloc(entire_size);
             let mut filled_size: usize = 0;
             for (k, v) in self.requires {
-                if let Some(val) = conf.get(k) {
+                if let Some(val) = conf.get(&k) {
                     let ptr = util::cast_to_ptr(val);
                     let size = util::size_of_value(val);
                     ptr::copy_nonoverlapping(ptr, buf.offset(filled_size), size);
@@ -134,7 +134,7 @@ impl Driver {
             }
             let detect = self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect");
             let mut ret_size: usize = 0;
-            let res = detect(buf, &ret_size as *mut usize);
+            let res = detect(buf, &mut ret_size as *mut usize);
             let rv = mem::transmute::<*const *const u8, Vec<*const u8>>(res);
             println!("{:?}", rv);
         }
