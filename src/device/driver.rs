@@ -82,13 +82,14 @@ impl Driver {
         let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
         let requires = metadata.requires.into_iter().map(|(k, v)| {
+            let type_str = v.schema.as_ref().and_then(|schema| schema["type"].as_str()).unwrap_or("integer").to_string();
             let compiled_schema = v.schema.map(|schema| {
                 schema::compile(schema, None, CompilationSettings::new(&keywords::default(), true)).map_err(|e| error::SchemaError::from(e))
             }).map_or(Ok(None), |r| r.map(Some))?;
             Ok((k, Requirement {
                 detects: v.detects.unwrap_or(false),
                 schema: compiled_schema,
-                type_str: v.schema.and_then(|schema| schema["type"].as_str()).unwrap_or("integer").to_string()
+                type_str
             }))
         }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
         Ok(Driver {
@@ -126,8 +127,8 @@ impl Driver {
         unsafe {
             let buf = util::alloc(entire_size);
             let mut filled_size: usize = 0;
-            for (k, v) in self.requires {
-                if let Some(val) = conf.get(&k) {
+            for (k, v) in &self.requires {
+                if let Some(val) = conf.get(k) {
                     let ptr = util::cast_to_ptr(val);
                     let size = util::size_of_value(val);
                     ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
