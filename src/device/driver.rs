@@ -2,7 +2,7 @@ use device::category::Category;
 use device::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
-use config::ConfigValue;
+use config::{Config, ConfigValue};
 
 use serde_yaml;
 use serde_json;
@@ -88,12 +88,16 @@ impl Driver {
             .all(|sym| unsafe { self.get::<fn(u32) -> u32>(sym) }.is_ok())
     }
 
-    pub fn validate_config(&self, key: &str, value: &ConfigValue) -> bool {
+    pub fn validate_config_value(&self, key: &str, value: &ConfigValue) -> bool {
         let scope = Scope::new();
         self.requires.get(key).and_then(|req| req.schema.as_ref()).map(|schema| {
             let sschema = ScopedSchema::new(&scope, &schema);
             sschema.validate(value).is_valid()
         }).unwrap_or(true)
+    }
+
+    pub fn validate_config(&self, config: &Config) -> bool {
+        config.iter().all(|(k, v)| self.validate_config_value(k, v))
     }
 
     pub fn path(&self) -> &PathBuf {
