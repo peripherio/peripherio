@@ -3,6 +3,7 @@ pub mod device;
 pub mod config;
 pub mod error;
 pub mod resolve;
+pub mod util;
 
 extern crate futures;
 extern crate grpcio;

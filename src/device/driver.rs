@@ -3,6 +3,7 @@ use device::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
 use config::{Config, ConfigValue};
+use util;
 
 use serde_yaml;
 use serde_json;
@@ -16,6 +17,8 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 use std::fmt;
+use std::mem;
+use std::ptr;
 
 pub struct Requirement {
     detects: bool,
@@ -112,6 +115,28 @@ impl Driver {
 
     pub fn validate_config(&self, config: &Config) -> bool {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
+    }
+
+    pub fn detect(&self, conf: &Config) { /*-> Vec<Config> {*/
+        let entire_size: usize = self.requires.iter().fold(0, |(_, v)| util::size_of_type(v.schema["type"]));
+        unsafe {
+            let buf = util::alloc(entire_size);
+            let mut filled_size: usize = 0;
+            for (k, v) in self.requires {
+                if let Some(val) = conf.get(k) {
+                    let ptr = util::cast_to_ptr(val);
+                    ptr::copy_nonoverlapping(ptr, buf.offset(filled_size), size);
+                    filled_size += size;
+                } else {
+                    filled_size += util::size_of_type(v.schema["type"]);
+                }
+            }
+            let detect = self.get<fn(*u8, *usize) -> **u8>("detect");
+            let mut ret_size: usize = 0;
+            let res = detect(buf, &ret_size as *mut usize);
+            let rv = mem::transmute<**u8, Vec<*u8>>(res);
+            println!("{:?}", rv);
+        }
     }
 
     pub fn path(&self) -> &PathBuf {
