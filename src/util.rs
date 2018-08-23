@@ -40,7 +40,7 @@ pub unsafe fn cast_to_ptr(v: &Value) -> *const u8 {
         /*Value::Null => 0, Unsupported */
         Value::Bool(b) => mem::transmute::<&bool, *const u8>(&b),
         Value::Number(n) => {
-            let via = n.as_f64();
+            let via = n.as_f64().unwrap();
             mem::transmute::<&f64, *const u8>(&via) // f64
         },
         Value::String(s) => CString::new(s.clone()).unwrap().as_ptr() as *const u8, // ptr(64bit)
