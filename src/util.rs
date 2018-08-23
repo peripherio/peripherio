@@ -1,6 +1,8 @@
 use serde_json::value::Value;
 
 use std::{slice, mem};
+use std::ffi::CString;
+
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);
@@ -41,7 +43,7 @@ pub unsafe fn cast_to_ptr(v: &Value) -> *const u8 {
             let via = n.as_f64();
             mem::transmute::<&f64, *const u8>(&via) // f64
         },
-        Value::String(s) => mem::transmute::<&str, *const u8>(s.as_str()), // ptr(64bit)
+        Value::String(s) => CString::new(*s).unwrap().as_ptr() as *const u8, // ptr(64bit)
         Value::Array(ary) => Box::into_raw(ary.into_boxed_slice()) as *const u8, // ptr
         /*Value::Object => 8, Write someday // ptr */
         _ => unimplemented!()
