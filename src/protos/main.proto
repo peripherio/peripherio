@@ -35,17 +35,11 @@ message FindResponse {
 }
 
 message Config {
-  message I2C {
-    int32 bus = 1;
-    int32 speed = 2;
+  message Pair {
+    string key = 1;
+    string value = 2; // JSON (FIXME)
   }
-  message SPI {
-    int32 bus = 1;
-    int32 speed = 2;
-    int32 cs_pin = 3;
-  }
-  I2C i2c = 1;
-  SPI spi = 2;
+  repeated Pair config = 1;
 }
 
 message Device {
