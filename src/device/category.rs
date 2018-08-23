@@ -53,6 +53,10 @@ impl Category {
         })
     }
 
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
     pub fn required_symbols(&self) -> &Vec<String> {
         &self.required_symbols
     }
