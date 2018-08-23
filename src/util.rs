@@ -1,4 +1,4 @@
-use std::slice;
+use std::{slice, mem};
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);
