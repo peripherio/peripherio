@@ -131,7 +131,7 @@ impl Driver {
                     filled_size += util::size_of_type(v.schema["type"]);
                 }
             }
-            let detect = self.get<fn(*u8, *usize) -> **u8>("detect");
+            let detect = self.get::<fn(*u8, *usize) -> **u8>("detect");
             let mut ret_size: usize = 0;
             let res = detect(buf, &ret_size as *mut usize);
             let rv = mem::transmute<**u8, Vec<*u8>>(res);

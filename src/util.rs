@@ -34,12 +34,12 @@ pub fn size_of_type(typestr: &str) -> usize {
 pub unsafe fn cast_to_ptr(v: Value) -> *const u8 {
     match v {
         /*Null => 0, Unsupported */
-        Bool(b) => mem::transmute<&bool, *const u8>(&b),
+        Bool(b) => mem::transmute::<&bool, *const u8>(&b),
         Number(n) => {
             let via = n.as_f64();
-            mem::transmute<&f64, *const u8>(&via) // f64
+            mem::transmute::<&f64, *const u8>(&via) // f64
         },
-        String(s) => mem::transmute<&str, *const u8>(s.as_str()), // ptr(64bit)
+        String(s) => mem::transmute::<&str, *const u8>(s.as_str()), // ptr(64bit)
         Array(ary) => Box::into_raw(ary.into_boxed_slice()) as *const u8, // ptr
         /*Object => 8, Write someday // ptr */
     }
