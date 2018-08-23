@@ -21,6 +21,16 @@ pub struct Requirement {
     schema: Option<Schema>
 }
 
+impl Requirement {
+    pub fn schema(&self) -> &Option<Schema> {
+        &self.schema
+    }
+
+    pub fn detects(&self) -> bool {
+        self.detects
+    }
+}
+
 pub struct Driver {
     path: PathBuf,
     name: String,
@@ -90,7 +100,7 @@ impl Driver {
 
     pub fn validate_config_value(&self, key: &str, value: &ConfigValue) -> bool {
         let scope = Scope::new();
-        self.requires.get(key).and_then(|req| req.schema.as_ref()).map(|schema| {
+        self.requires.get(key).and_then(|req| req.schema().as_ref()).map(|schema| {
             let sschema = ScopedSchema::new(&scope, &schema);
             sschema.validate(value).is_valid()
         }).unwrap_or(true)
