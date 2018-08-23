@@ -118,7 +118,7 @@ impl Driver {
     }
 
     pub fn detect(&self, conf: &Config) { /*-> Vec<Config> {*/
-        let entire_size: usize = self.requires.iter().fold(0, |(_, v)| util::size_of_type(v.schema["type"]));
+        let entire_size: usize = self.requires.iter().fold(0, |sum, (_, v)| sum + util::size_of_type(v.schema.unwrap()["type"]));
         unsafe {
             let buf = util::alloc(entire_size);
             let mut filled_size: usize = 0;
