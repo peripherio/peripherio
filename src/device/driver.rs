@@ -36,6 +36,7 @@ pub struct Driver {
     name: String,
     version: String,
     author: Option<String>,
+    vendor: Option<String>,
     category: Vec<Category>,
     requires: HashMap<String, Requirement>,
     driver: Library
@@ -54,6 +55,7 @@ struct LibMetaData {
     name: String,
     version: String,
     author: Option<String>,
+    vendor: Option<String>,
     category: Vec<String>,
     driver: Option<String>,
     requires: HashMap<String, RequirementData>
@@ -86,6 +88,7 @@ impl Driver {
             driver: Library::new(path.as_ref().join(driver_file))?,
             name: metadata.name,
             author: metadata.author,
+            vendor: metadata.vendor,
             version: metadata.version,
             requires,
             category
