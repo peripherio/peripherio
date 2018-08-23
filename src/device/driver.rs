@@ -125,6 +125,7 @@ impl Driver {
             for (k, v) in self.requires {
                 if let Some(val) = conf.get(k) {
                     let ptr = util::cast_to_ptr(val);
+                    let size = util::size_of_value(val);
                     ptr::copy_nonoverlapping(ptr, buf.offset(filled_size), size);
                     filled_size += size;
                 } else {
