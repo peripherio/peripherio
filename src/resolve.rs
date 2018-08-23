@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::fs::{ReadDir, DirEntry};
 
 pub fn resolve(name: &str, environ: &'static str, file: &'static str) -> Result<PathBuf, Error> {
-    list_paths(environ, file)?
+    paths(environ, file)?
         .find(|path| path.join(file).is_file())
         .map(|path| path.to_path_buf())
         .ok_or(CannotResolveError{name: name.to_owned()}.into())
