@@ -17,7 +17,7 @@ use std::fmt;
 
 pub struct Requirement {
     detects: bool,
-    schema: Schema
+    schema: Option<Schema>
 }
 
 pub struct Driver {
@@ -34,8 +34,8 @@ const COMMON_SYMBOLS: [&str; 2] = ["init", "detect"];
 
 #[derive(Deserialize, Serialize)]
 struct RequirementData {
-    detects: bool,
-    schema: serde_json::Value
+    detects: Option<bool>,
+    schema: Option<serde_json::Value>
 }
 
 #[derive(Deserialize, Serialize)]
@@ -62,9 +62,11 @@ impl Driver {
         let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
         let requires = metadata.requires.into_iter().map(|(k, v)| {
-            let compiled_schema = schema::compile(v.schema, None, CompilationSettings::new(&HashMap::new(), true)).map_err(|e| error::SchemaError::from(e))?;
+            let compiled_schema = v.schema.map(|schema| {
+                schema::compile(schema, None, CompilationSettings::new(&HashMap::new(), true)).map_err(|e| error::SchemaError::from(e))
+            }).map_or(Ok(None), |r| r.map(Some))?;
             Ok((k, Requirement {
-                detects: v.detects,
+                detects: v.detects.unwrap_or(false),
                 schema: compiled_schema
             }))
         }).collect::<Result<HashMap<String, Requirement>, Error>>()?;
