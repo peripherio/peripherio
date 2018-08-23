@@ -22,7 +22,8 @@ use std::ptr;
 
 pub struct Requirement {
     detects: bool,
-    schema: Option<Schema>
+    schema: Option<Schema>,
+    type_str: String
 }
 
 impl Requirement {
@@ -32,6 +33,10 @@ impl Requirement {
 
     pub fn detects(&self) -> bool {
         self.detects
+    }
+
+    pub fn type_str(&self) -> &String {
+        &self.type_str
     }
 }
 
@@ -84,7 +89,8 @@ impl Driver {
             }).map_or(Ok(None), |r| r.map(Some))?;
             Ok((k, Requirement {
                 detects: v.detects.unwrap_or(false),
-                schema: compiled_schema
+                schema: compiled_schema,
+                type_str: v.schema.and_then(|schema| schema["type"].as_str()).unwrap_or("integer").to_string()
             }))
         }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
         Ok(Driver {
@@ -118,7 +124,7 @@ impl Driver {
     }
 
     pub fn detect(&self, conf: &Config) { /*-> Vec<Config> {*/
-        let entire_size: usize = self.requires.iter().fold(0, |sum, (_, v)| sum + util::size_of_type(v.schema.unwrap()["type"]));
+        let entire_size: usize = self.requires.iter().fold(0, |sum, (_, v)| sum + util::size_of_type(v.type_str()));
         unsafe {
             let buf = util::alloc(entire_size);
             let mut filled_size: usize = 0;
@@ -126,13 +132,13 @@ impl Driver {
                 if let Some(val) = conf.get(&k) {
                     let ptr = util::cast_to_ptr(val);
                     let size = util::size_of_value(val);
-                    ptr::copy_nonoverlapping(ptr, buf.offset(filled_size), size);
+                    ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
                     filled_size += size;
                 } else {
-                    filled_size += util::size_of_type(v.schema["type"]);
+                    filled_size += util::size_of_type(v.type_str());
                 }
             }
-            let detect = self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect");
+            let detect = self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap();
             let mut ret_size: usize = 0;
             let res = detect(buf, &mut ret_size as *mut usize);
             let rv = mem::transmute::<*const *const u8, Vec<*const u8>>(res);
