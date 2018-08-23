@@ -1,3 +1,4 @@
+use config::Config;
 use device::driver::Driver;
 use resolve;
 
@@ -23,5 +24,9 @@ impl DriverManager {
 
     pub fn drivers(&self) -> &Vec<Driver> {
         &self.drivers
+    }
+
+    pub fn suitable_drivers<'a>(&'a self, conf: &'a Config) -> impl Iterator<Item=&'a Driver> {
+        self.drivers.iter().filter(move |drv| drv.validate_config(conf))
     }
 }

@@ -1,3 +1,4 @@
+use valico::json_schema::keywords;
 use valico::json_schema::schema::{self, Schema, CompilationSettings};
 use serde_json::value::Value;
 use std::collections::HashMap;
@@ -23,7 +24,7 @@ lazy_static! {
             })),
         ]
         .into_iter().map(|(k, v)| {
-            (k, schema::compile(v, None, CompilationSettings::new(&HashMap::new(), true)).unwrap())
+            (k, schema::compile(v, None, CompilationSettings::new(&keywords::default(), true)).unwrap())
         })
         .collect();
 }
