@@ -1,3 +1,5 @@
+use serde_json::value::Value;
+
 use std::{slice, mem};
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
@@ -13,12 +15,12 @@ pub unsafe fn free(raw: *mut u8, len : usize) {
 
 pub fn size_of_value(v: Value) -> usize {
     match v {
-        /*Null => 0, Unsupported */
-        Bool => 1, // u8
-        Number => 8, // f64
-        String => 8, // ptr(64bit)
-        Array => 8, // ptr
-        /*Object => 8, Write someday // ptr */
+        /*Value::Null => 0, Unsupported */
+        Value::Bool(_) => 1, // u8
+        Value::Number(_) => 8, // f64
+        Value::String(_) => 8, // ptr(64bit)
+        Value::Array(_) => 8, // ptr
+        /*Value::Object(_) => 8, Write someday // ptr */
         _ => unimplemented!()
     }
 }
@@ -33,14 +35,15 @@ pub fn size_of_type(typestr: &str) -> usize {
 
 pub unsafe fn cast_to_ptr(v: Value) -> *const u8 {
     match v {
-        /*Null => 0, Unsupported */
-        Bool(b) => mem::transmute::<&bool, *const u8>(&b),
-        Number(n) => {
+        /*Value::Null => 0, Unsupported */
+        Value::Bool(b) => mem::transmute::<&bool, *const u8>(&b),
+        Value::Number(n) => {
             let via = n.as_f64();
             mem::transmute::<&f64, *const u8>(&via) // f64
         },
-        String(s) => mem::transmute::<&str, *const u8>(s.as_str()), // ptr(64bit)
-        Array(ary) => Box::into_raw(ary.into_boxed_slice()) as *const u8, // ptr
-        /*Object => 8, Write someday // ptr */
+        Value::String(s) => mem::transmute::<&str, *const u8>(s.as_str()), // ptr(64bit)
+        Value::Array(ary) => Box::into_raw(ary.into_boxed_slice()) as *const u8, // ptr
+        /*Value::Object => 8, Write someday // ptr */
+        _ => unimplemented!()
     }
 }
