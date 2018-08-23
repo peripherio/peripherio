@@ -1,10 +1,9 @@
-use valico::json_schema::keywords;
-use valico::json_schema::schema::{self, Schema, CompilationSettings};
-use serde_json::value::Value;
-use std::collections::HashMap;
+use config::{Config, ConfigValue};
 
-pub type ConfigValue = Value;
-pub type Config = HashMap<String, ConfigValue>;
+use valico::json_schema::{keywords, Scope};
+use valico::json_schema::schema::{self, ScopedSchema, Schema, CompilationSettings};
+
+use std::collections::HashMap;
 
 lazy_static! {
     static ref GLOBAL_SCHEMA: HashMap<&'static str, Schema> = vec![
@@ -27,4 +26,16 @@ lazy_static! {
             (k, schema::compile(v, None, CompilationSettings::new(&keywords::default(), true)).unwrap())
         })
         .collect();
+}
+
+pub fn validate_config_value(key: &str, value: &ConfigValue) -> bool {
+    let scope = Scope::new();
+    GLOBAL_SCHEMA.get(key).map(|schema| {
+        let sschema = ScopedSchema::new(&scope, &schema);
+        sschema.validate(value).is_valid()
+    }).unwrap_or(true)
+}
+
+pub fn validate_config(config: &Config) -> bool {
+    config.iter().all(|(k, v)| validate_config_value(k, v))
 }
