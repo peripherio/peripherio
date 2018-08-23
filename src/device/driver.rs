@@ -16,9 +16,7 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
-use std::fmt;
-use std::mem;
-use std::ptr;
+use std::{fmt, mem, ptr, slice};
 
 pub struct Requirement {
     detects: bool,
@@ -141,7 +139,8 @@ impl Driver {
             let detect = self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap();
             let mut ret_size: usize = 0;
             let res = detect(buf, &mut ret_size as *mut usize);
-            let rv = mem::transmute::<*const *const u8, Vec<*const u8>>(res);
+            println!("size: {:?}", ret_size);
+            let rv = slice::from_raw_parts(res, ret_size);
             println!("{:?}", rv);
         }
     }
