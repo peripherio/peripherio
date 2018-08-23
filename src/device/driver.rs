@@ -117,6 +117,18 @@ impl Driver {
         &self.path
     }
 
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn category(&self) -> &Vec<Category> {
+        &self.category
+    }
+
+    pub fn vendor(&self) -> &Option<String> {
+        &self.vendor
+    }
+
     pub unsafe fn get<'lib, T: 'lib>(&'lib self, name: &str) -> Result<Symbol<'lib, T>, Error> {
         self.driver.get(name.as_bytes()).map_err(|e| e.into())
     }
