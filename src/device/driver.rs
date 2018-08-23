@@ -8,6 +8,7 @@ use serde_yaml;
 use serde_json;
 use valico::json_schema::{self, Scope, keywords};
 use valico::json_schema::schema::{self, ScopedSchema, Schema, CompilationSettings};
+use linked_hash_map::LinkedHashMap;
 use failure::Error;
 
 use std::path::{Path, PathBuf};
@@ -38,7 +39,7 @@ pub struct Driver {
     author: Option<String>,
     vendor: Option<String>,
     category: Vec<Category>,
-    requires: HashMap<String, Requirement>,
+    requires: LinkedHashMap<String, Requirement>,
     driver: Library
 }
 
@@ -58,7 +59,7 @@ struct LibMetaData {
     vendor: Option<String>,
     category: Vec<String>,
     driver: Option<String>,
-    requires: HashMap<String, RequirementData>
+    requires: LinkedHashMap<String, RequirementData>
 }
 
 impl Driver {
@@ -82,7 +83,7 @@ impl Driver {
                 detects: v.detects.unwrap_or(false),
                 schema: compiled_schema
             }))
-        }).collect::<Result<HashMap<String, Requirement>, Error>>()?;
+        }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
         Ok(Driver {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,

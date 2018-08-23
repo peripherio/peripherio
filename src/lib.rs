@@ -9,6 +9,7 @@ extern crate grpcio;
 extern crate protobuf;
 extern crate serde_yaml;
 extern crate valico;
+extern crate linked_hash_map;
 
 #[macro_use]
 extern crate failure;
