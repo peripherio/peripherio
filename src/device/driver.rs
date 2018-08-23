@@ -1,13 +1,24 @@
 use device::category::Category;
 use device::libloading::{Library, Symbol};
+use error;
 use resolve::resolve;
 
 use serde_yaml;
+use serde_json;
+use valico::json_schema::{self, Scope};
+use valico::json_schema::schema::{self, Schema, CompilationSettings};
 use failure::Error;
 
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
+use std::collections::HashMap;
+use std::fmt;
+
+pub struct Requirement {
+    detects: bool,
+    schema: Schema
+}
 
 pub struct Driver {
     path: PathBuf,
@@ -15,18 +26,26 @@ pub struct Driver {
     version: String,
     author: Option<String>,
     category: Vec<Category>,
+    requires: HashMap<String, Requirement>,
     driver: Library
 }
 
 const COMMON_SYMBOLS: [&str; 2] = ["init", "detect"];
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
+struct RequirementData {
+    detects: bool,
+    schema: serde_json::Value
+}
+
+#[derive(Deserialize, Serialize)]
 struct LibMetaData {
     name: String,
     version: String,
     author: Option<String>,
     category: Vec<String>,
-    driver: Option<String>
+    driver: Option<String>,
+    requires: HashMap<String, RequirementData>
 }
 
 impl Driver {
@@ -42,12 +61,20 @@ impl Driver {
 
         let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
+        let requires = metadata.requires.into_iter().map(|(k, v)| {
+            let compiled_schema = schema::compile(v.schema, None, CompilationSettings::new(&HashMap::new(), true)).map_err(|e| error::SchemaError::from(e))?;
+            Ok((k, Requirement {
+                detects: v.detects,
+                schema: compiled_schema
+            }))
+        }).collect::<Result<HashMap<String, Requirement>, Error>>()?;
         Ok(Driver {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,
             name: metadata.name,
             author: metadata.author,
             version: metadata.version,
+            requires,
             category
         })
     }
