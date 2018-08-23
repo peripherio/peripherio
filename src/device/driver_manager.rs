@@ -20,4 +20,8 @@ impl DriverManager {
             .collect::<Result<_, _>>()?;
         Ok(())
     }
+
+    pub fn drivers(&self) -> &Vec<Driver> {
+        &self.drivers
+    }
 }
