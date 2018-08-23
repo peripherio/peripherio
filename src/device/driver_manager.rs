@@ -1,5 +1,6 @@
 use config::Config;
 use device::driver::Driver;
+use device::driver_spec::DriverSpec;
 use resolve;
 
 use failure::Error;
@@ -26,7 +27,7 @@ impl DriverManager {
         &self.drivers
     }
 
-    pub fn suitable_drivers<'a>(&'a self, conf: &'a Config) -> impl Iterator<Item=&'a Driver> {
-        self.drivers.iter().filter(move |drv| drv.validate_config(conf))
+    pub fn suitable_drivers<'a>(&'a self, spec: &'a DriverSpec, conf: &'a Config) -> impl Iterator<Item=&'a Driver> {
+        self.drivers.iter().filter(move |drv| spec.is_conforming(drv)).filter(move |drv| drv.validate_config(conf))
     }
 }
