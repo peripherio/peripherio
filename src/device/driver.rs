@@ -6,7 +6,7 @@ use config::{Config, ConfigValue};
 
 use serde_yaml;
 use serde_json;
-use valico::json_schema::{self, Scope};
+use valico::json_schema::{self, Scope, keywords};
 use valico::json_schema::schema::{self, ScopedSchema, Schema, CompilationSettings};
 use failure::Error;
 
@@ -64,7 +64,7 @@ impl Driver {
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
         let requires = metadata.requires.into_iter().map(|(k, v)| {
             let compiled_schema = v.schema.map(|schema| {
-                schema::compile(schema, None, CompilationSettings::new(&HashMap::new(), true)).map_err(|e| error::SchemaError::from(e))
+                schema::compile(schema, None, CompilationSettings::new(&keywords::default(), true)).map_err(|e| error::SchemaError::from(e))
             }).map_or(Ok(None), |r| r.map(Some))?;
             Ok((k, Requirement {
                 detects: v.detects.unwrap_or(false),
