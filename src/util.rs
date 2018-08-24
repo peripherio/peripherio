@@ -1,7 +1,7 @@
 use serde_json::value::{Value, Number};
 
 use std::{slice, mem};
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
@@ -63,8 +63,8 @@ pub unsafe fn cast_from_ptr(type_str: &str, ptr: *const u8) -> Value {
         },
         "string" => {
             let sp = mem::transmute::<*const u8, &*mut i8>(ptr); // ptr
-            let cstr = CString::from_raw(*sp);
-            Value::String(cstr.into_string().unwrap())
+            let cstr = CStr::from_ptr(*sp);
+            Value::String(cstr.to_str().unwrap().to_string())
         }
         // "array" => Box::into_raw(ary.clone().into_boxed_slice()) as *const u8, // ptr
         /*"object" => 8, Write someday // ptr */
