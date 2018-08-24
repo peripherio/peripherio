@@ -122,42 +122,44 @@ impl Driver {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
     }
 
-    pub fn detect(&self, conf: &Config) { /*-> Vec<Config> {*/
+    pub fn detect(&self, conf: &Config) -> Vec<Config> {
         let entire_size: usize = self.requires.iter().fold(0, |sum, (_, v)| sum + util::size_of_type(v.type_str()));
-        unsafe {
-            let buf = util::alloc(entire_size);
-            let mut filled_size: usize = 0;
-            for (k, v) in &self.requires {
-                if let Some(val) = conf.get(k) {
+        let buf = unsafe { util::alloc(entire_size) };
+        let mut filled_size: usize = 0;
+        for (k, v) in &self.requires {
+            if let Some(val) = conf.get(k) {
+                let size = util::size_of_value(val);
+                unsafe {
                     let ptr = util::cast_to_ptr(val);
-                    let size = util::size_of_value(val);
                     ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
-                    filled_size += size;
-                } else {
-                    let size = util::size_of_type(v.type_str());
-                    ptr::write_bytes(buf.offset(filled_size as isize), 0, size);
-                    filled_size += size;
                 }
-            }
-            let detect = self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap();
-            let mut ret_size: usize = 0;
-            let res = detect(buf, &mut ret_size as *mut usize);
-            println!("size: {:?}", ret_size);
-            let ary_of_conf = slice::from_raw_parts(res, ret_size);
-            for ret_conf in ary_of_conf {
-                let mut newconf = conf.clone();
-                let mut retrieved_size: usize = 0;
-                for (k, v) in &self.requires {
-                    let size = util::size_of_type(v.type_str());
-                    let buf = util::alloc(size);
-                    ptr::copy_nonoverlapping(ret_conf.offset(retrieved_size as isize), buf, size);
-                    let val = util::cast_from_ptr(v.type_str(), buf);
-                    retrieved_size += size;
-                    newconf.insert(k.to_string(), val);
-                }
-                println!("newconf! {:?}", newconf);
+                filled_size += size;
+            } else {
+                let size = util::size_of_type(v.type_str());
+                unsafe { ptr::write_bytes(buf.offset(filled_size as isize), 0, size) };
+                filled_size += size;
             }
         }
+        let detect = unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap() };
+        let mut ret_size: usize = 0;
+        let res = detect(buf, &mut ret_size as *mut usize);
+        let ary_of_conf = unsafe { slice::from_raw_parts(res, ret_size) };
+        ary_of_conf.iter().map(|ret_conf| {
+            let mut newconf = conf.clone();
+            let mut retrieved_size: usize = 0;
+            for (k, v) in &self.requires {
+                let size = util::size_of_type(v.type_str());
+                let val = unsafe {
+                    let buf = util::alloc(size);
+                    ptr::copy_nonoverlapping(ret_conf.offset(retrieved_size as isize), buf, size);
+                    util::cast_from_ptr(v.type_str(), buf)
+                };
+                retrieved_size += size;
+                newconf.insert(k.to_string(), val);
+            }
+            println!("newconf! {:?}", newconf);
+            newconf
+        }).collect()
     }
 
     pub fn path(&self) -> &PathBuf {
