@@ -160,7 +160,6 @@ impl Driver {
                 retrieved_size += size;
                 newconf.insert(k.to_string(), val);
             }
-            println!("newconf! {:?}", newconf);
             newconf
         }).collect()
     }
