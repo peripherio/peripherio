@@ -134,7 +134,9 @@ impl Driver {
                     ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
                     filled_size += size;
                 } else {
-                    filled_size += util::size_of_type(v.type_str());
+                    let size = util::size_of_type(v.type_str());
+                    ptr::write_bytes(buf, 0, size);
+                    filled_size += size;
                 }
             }
             let detect = self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap();
