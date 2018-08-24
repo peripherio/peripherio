@@ -1,4 +1,4 @@
-use serde_json::value::Value;
+use serde_json::value::{Value, Number};
 
 use std::{slice, mem};
 use std::ffi::CString;
@@ -49,6 +49,25 @@ pub unsafe fn cast_to_ptr(v: &Value) -> *const u8 {
         }
         Value::Array(ary) => Box::into_raw(ary.clone().into_boxed_slice()) as *const u8, // ptr
         /*Value::Object => 8, Write someday // ptr */
+        _ => unimplemented!()
+    }
+}
+
+pub unsafe fn cast_from_ptr(type_str: &str, ptr: *const u8) -> Value {
+    match type_str {
+        /*"null" => 0, Unsupported */
+        "bool" => Value::Bool(*mem::transmute::<*const u8, &bool>(ptr)),
+        "integer" | "number" => {
+            let f = mem::transmute::<*const u8, &f64>(ptr); // f64
+            Value::Number(Number::from_f64(*f).unwrap())
+        },
+        "string" => {
+            let sp = mem::transmute::<*const u8, &*mut i8>(ptr); // ptr
+            let cstr = CString::from_raw(*sp);
+            Value::String(cstr.into_string().unwrap())
+        }
+        // "array" => Box::into_raw(ary.clone().into_boxed_slice()) as *const u8, // ptr
+        /*"object" => 8, Write someday // ptr */
         _ => unimplemented!()
     }
 }

@@ -143,8 +143,19 @@ impl Driver {
             let mut ret_size: usize = 0;
             let res = detect(buf, &mut ret_size as *mut usize);
             println!("size: {:?}", ret_size);
-            let rv = slice::from_raw_parts(res, ret_size);
-            println!("{:?}", rv);
+            let ary_of_conf = slice::from_raw_parts(res, ret_size);
+            for ret_conf in ary_of_conf {
+                let mut newconf = conf.clone();
+                let mut retrieved_size: usize = 0;
+                for (k, v) in &self.requires {
+                    let size = util::size_of_type(v.type_str());
+                    let buf = util::alloc(size);
+                    ptr::copy_nonoverlapping(ret_conf.offset(retrieved_size as isize), buf, size);
+                    let val = util::cast_from_ptr(v.type_str(), buf);
+                    newconf.insert(k.to_string(), val);
+                }
+                println!("newconf! {:?}", newconf);
+            }
         }
     }
 
