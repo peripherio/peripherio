@@ -135,7 +135,7 @@ impl Driver {
                     filled_size += size;
                 } else {
                     let size = util::size_of_type(v.type_str());
-                    ptr::write_bytes(buf, 0, size);
+                    ptr::write_bytes(buf.offset(filled_size as isize), 0, size);
                     filled_size += size;
                 }
             }
