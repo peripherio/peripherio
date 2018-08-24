@@ -143,6 +143,7 @@ impl Driver {
         let detect = unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap() };
         let mut ret_size: usize = 0;
         let res = detect(buf, &mut ret_size as *mut usize);
+        unsafe { util::free(buf, entire_size) };
         let ary_of_conf = unsafe { slice::from_raw_parts(res, ret_size) };
         ary_of_conf.iter().map(|ret_conf| {
             let mut newconf = conf.clone();
@@ -152,7 +153,9 @@ impl Driver {
                 let val = unsafe {
                     let buf = util::alloc(size);
                     ptr::copy_nonoverlapping(ret_conf.offset(retrieved_size as isize), buf, size);
-                    util::cast_from_ptr(v.type_str(), buf)
+                    let val = util::cast_from_ptr(v.type_str(), buf).clone();
+                    util::free(buf, size);
+                    val
                 };
                 retrieved_size += size;
                 newconf.insert(k.to_string(), val);
