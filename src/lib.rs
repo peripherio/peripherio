@@ -9,6 +9,7 @@ extern crate futures;
 extern crate grpcio;
 extern crate protobuf;
 extern crate serde_yaml;
+extern crate rand;
 extern crate valico;
 extern crate linked_hash_map;
 
