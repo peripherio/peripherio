@@ -26,14 +26,14 @@ impl<'a> DeviceManager<'a> {
         }
     }
 
-    pub fn add(&self, drv: &'a Driver, conf: Config) -> Result<Device, Error> {
+    pub fn add(&mut self, drv: &'a Driver, conf: Config) -> Result<Device, Error> {
         let device = Device(self.devices.len());
         self.devices.insert(device, DeviceData::<'a>(drv, conf));
         self.names.insert(device, self.generate_name());
         Ok(device)
     }
 
-    fn generate_name(&self) -> String {
+    fn generate_name(&mut self) -> String {
         let lhs = self.rng.choose(&LHS_WORDS).unwrap();
         let rhs = self.rng.choose(&RHS_WORDS).unwrap();
         format!("{}_{}", lhs, rhs)
