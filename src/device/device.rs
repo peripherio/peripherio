@@ -1,30 +1,36 @@
-use rand::{StdRng, Rng};
+use device::driver::Driver;
+use config::Config;
 
-#[derive(Copy, Clone, Eq, Hash)]
-struct Device(u64);
+use failure::Error;
+use rand::{thread_rng, ThreadRng, Rng};
 
-struct DeviceData(&Driver, Config);
+use std::collections::HashMap;
 
-pub struct DeviceManager {
-    devices: HashMap<Device, DeviceData>,
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub struct Device(usize);
+
+struct DeviceData<'a>(&'a Driver, Config);
+
+pub struct DeviceManager<'a> {
+    devices: HashMap<Device, DeviceData<'a>>,
     names: HashMap<Device, String>,
-    rng: StdRng
+    rng: ThreadRng
 }
 
-impl DeviceManager {
-    pub fn new() -> Result<Self, Error> {
+impl<'a> DeviceManager<'a> {
+    pub fn new() -> Self {
         Self {
             devices: HashMap::new(),
             names: HashMap::new(),
-            rng: StdRng::new()
+            rng: thread_rng()
         }
     }
 
-    pub fn add(&self, drv: &Driver, conf: Config) -> Result<Device, Error> {
+    pub fn add(&self, drv: &'a Driver, conf: Config) -> Result<Device, Error> {
         let device = Device(self.devices.len());
-        self.devices.insert(device, DeviceData(drv, conf));
+        self.devices.insert(device, DeviceData::<'a>(drv, conf));
         self.names.insert(device, self.generate_name());
-        device
+        Ok(device)
     }
 
     fn generate_name(&self) -> String {
