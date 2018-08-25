@@ -46,6 +46,18 @@ impl<'a> DeviceManager<'a> {
         }
         name
     }
+
+    pub fn get_device_name(&self, dev: &Device) -> Option<&String> {
+        self.names.get(dev)
+    }
+
+    pub fn get_device_config(&self, dev: &Device) -> Option<&Config> {
+        self.devices.get(dev).map(|data| &data.1)
+    }
+
+    pub fn get_name_device(&'a self, name: &str) -> Option<&'a Device> {
+        self.names.iter().find(|(k, v)| *v == name).map(|v| v.0)
+    }
 }
 
 const LHS_WORDS: [&str; 100] = [
