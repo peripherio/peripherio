@@ -50,7 +50,7 @@ message Device {
 }
 
 message DriverSpecification {
-  string category = 1;
+  repeated string category = 1;
   string vendor = 2;
   string name = 3;
 }
