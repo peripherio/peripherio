@@ -122,7 +122,7 @@ impl Driver {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
     }
 
-    pub fn detect(&self, conf: &Config) -> Vec<Config> {
+    pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
         let entire_size: usize = self.requires.iter().fold(0, |sum, (_, v)| sum + util::size_of_type(v.type_str()));
         let buf = unsafe { util::alloc(entire_size) };
         let mut filled_size: usize = 0;
@@ -130,7 +130,7 @@ impl Driver {
             let size = util::size_of_type(v.type_str());
             if let Some(val) = conf.get(k) {
                 unsafe {
-                    let ptr = util::cast_to_ptr(v.type_str(), val);
+                    let ptr = util::cast_to_ptr(v.type_str(), val)?;
                     ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
                 }
                 filled_size += size;
@@ -139,7 +139,7 @@ impl Driver {
                 filled_size += size;
             }
         }
-        let detect = unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect").unwrap() };
+        let detect = unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect")? };
         let mut ret_size: usize = 0;
         let res = detect(buf, &mut ret_size as *mut usize);
         unsafe { util::free(buf, entire_size) };
@@ -152,14 +152,14 @@ impl Driver {
                 let val = unsafe {
                     let buf = util::alloc(size);
                     ptr::copy_nonoverlapping(ret_conf.offset(retrieved_size as isize), buf, size);
-                    let val = util::cast_from_ptr(v.type_str(), buf).clone();
+                    let val = util::cast_from_ptr(v.type_str(), buf)?.clone();
                     util::free(buf, size);
                     val
                 };
                 retrieved_size += size;
                 newconf.insert(k.to_string(), val);
             }
-            newconf
+            Ok(newconf)
         }).collect()
     }
 
