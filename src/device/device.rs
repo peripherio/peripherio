@@ -37,7 +37,14 @@ impl<'a> DeviceManager<'a> {
     fn generate_name(&mut self) -> String {
         let lhs = self.rng.choose(&LHS_WORDS).unwrap();
         let rhs = self.rng.choose(&RHS_WORDS).unwrap();
-        format!("{}_{}", lhs, rhs)
+        let mut name = format!("{}_{}", lhs, rhs);
+
+        let mut count = 0;
+        while self.names.values().find(|n| **n == name).is_some() {
+            name = format!("{}{}", name, count);
+            count += 1;
+        }
+        name
     }
 }
 
