@@ -3,22 +3,25 @@ use device::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
 use config::{Config, ConfigValue};
+use util;
 
 use serde_yaml;
 use serde_json;
 use valico::json_schema::{self, Scope, keywords};
 use valico::json_schema::schema::{self, ScopedSchema, Schema, CompilationSettings};
+use linked_hash_map::LinkedHashMap;
 use failure::Error;
 
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
-use std::fmt;
+use std::{fmt, mem, ptr, slice};
 
 pub struct Requirement {
     detects: bool,
-    schema: Option<Schema>
+    schema: Option<Schema>,
+    type_str: String
 }
 
 impl Requirement {
@@ -29,6 +32,10 @@ impl Requirement {
     pub fn detects(&self) -> bool {
         self.detects
     }
+
+    pub fn type_str(&self) -> &String {
+        &self.type_str
+    }
 }
 
 pub struct Driver {
@@ -38,7 +45,7 @@ pub struct Driver {
     author: Option<String>,
     vendor: Option<String>,
     category: Vec<Category>,
-    requires: HashMap<String, Requirement>,
+    requires: LinkedHashMap<String, Requirement>,
     driver: Library
 }
 
@@ -58,7 +65,7 @@ struct LibMetaData {
     vendor: Option<String>,
     category: Vec<String>,
     driver: Option<String>,
-    requires: HashMap<String, RequirementData>
+    requires: LinkedHashMap<String, RequirementData>
 }
 
 impl Driver {
@@ -75,14 +82,16 @@ impl Driver {
         let driver_file = metadata.driver.unwrap_or(format!("{}.so", metadata.name));
         let category = metadata.category.iter().map(|c| c.parse()).collect::<Result<Vec<_>, _>>()?;
         let requires = metadata.requires.into_iter().map(|(k, v)| {
+            let type_str = v.schema.as_ref().and_then(|schema| schema["type"].as_str()).unwrap_or("integer").to_string();
             let compiled_schema = v.schema.map(|schema| {
                 schema::compile(schema, None, CompilationSettings::new(&keywords::default(), true)).map_err(|e| error::SchemaError::from(e))
             }).map_or(Ok(None), |r| r.map(Some))?;
             Ok((k, Requirement {
                 detects: v.detects.unwrap_or(false),
-                schema: compiled_schema
+                schema: compiled_schema,
+                type_str
             }))
-        }).collect::<Result<HashMap<String, Requirement>, Error>>()?;
+        }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
         Ok(Driver {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,
@@ -111,6 +120,47 @@ impl Driver {
 
     pub fn validate_config(&self, config: &Config) -> bool {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
+    }
+
+    pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
+        let entire_size: usize = self.requires.iter().fold(0, |sum, (_, v)| sum + util::size_of_type(v.type_str()));
+        let buf = unsafe { util::alloc(entire_size) };
+        let mut filled_size: usize = 0;
+        for (k, v) in &self.requires {
+            let size = util::size_of_type(v.type_str());
+            if let Some(val) = conf.get(k) {
+                unsafe {
+                    let ptr = util::cast_to_ptr(v.type_str(), val)?;
+                    ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
+                }
+                filled_size += size;
+            } else {
+                unsafe { ptr::write_bytes(buf.offset(filled_size as isize), 0, size) };
+                filled_size += size;
+            }
+        }
+        let detect = unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect")? };
+        let mut ret_size: usize = 0;
+        let res = detect(buf, &mut ret_size as *mut usize);
+        unsafe { util::free(buf, entire_size) };
+        let ary_of_conf = unsafe { slice::from_raw_parts(res, ret_size) };
+        ary_of_conf.iter().map(|ret_conf| {
+            let mut newconf = conf.clone();
+            let mut retrieved_size: usize = 0;
+            for (k, v) in &self.requires {
+                let size = util::size_of_type(v.type_str());
+                let val = unsafe {
+                    let buf = util::alloc(size);
+                    ptr::copy_nonoverlapping(ret_conf.offset(retrieved_size as isize), buf, size);
+                    let val = util::cast_from_ptr(v.type_str(), buf)?.clone();
+                    util::free(buf, size);
+                    val
+                };
+                retrieved_size += size;
+                newconf.insert(k.to_string(), val);
+            }
+            Ok(newconf)
+        }).collect()
     }
 
     pub fn path(&self) -> &PathBuf {

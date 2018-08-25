@@ -1,4 +1,17 @@
 use valico::json_schema;
+use serde_json::value::{Value, Number};
+
+#[derive(Fail, Debug)]
+#[fail(display = "Cannot represent value \"{}\" in JSON format", value)]
+pub struct InvalidNumberError {
+    pub value: f64
+}
+
+#[derive(Fail, Debug)]
+#[fail(display = "Cannot convert JSON value \"{}\" to number", value)]
+pub struct InvalidJSONNumberError {
+    pub value: Number
+}
 
 #[derive(Fail, Debug)]
 #[fail(display = "Cannot resolve name {}", name)]

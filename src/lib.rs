@@ -3,12 +3,14 @@ pub mod device;
 pub mod config;
 pub mod error;
 pub mod resolve;
+pub mod util;
 
 extern crate futures;
 extern crate grpcio;
 extern crate protobuf;
 extern crate serde_yaml;
 extern crate valico;
+extern crate linked_hash_map;
 
 #[macro_use]
 extern crate failure;
