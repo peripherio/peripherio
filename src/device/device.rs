@@ -29,7 +29,8 @@ impl<'a> DeviceManager<'a> {
     pub fn add(&mut self, drv: &'a Driver, conf: Config) -> Result<Device, Error> {
         let device = Device(self.devices.len());
         self.devices.insert(device, DeviceData::<'a>(drv, conf));
-        self.names.insert(device, self.generate_name());
+        let name = self.generate_name();
+        self.names.insert(device, name);
         Ok(device)
     }
 
