@@ -45,20 +45,26 @@ impl DeviceManager {
                 .flat_map(|(drv, confs)| confs.into_iter().map(|c| {
                     let device = Device(devices.len());
                     devices.insert(device, DeviceData(drv, c));
-                    let lhs = rng.choose(&LHS_WORDS).unwrap();
-                    let rhs = rng.choose(&RHS_WORDS).unwrap();
-                    let mut name = format!("{}_{}", lhs, rhs);
 
-                    let mut count = 0;
-                    while names.values().find(|n| **n == name).is_some() {
-                        name = format!("{}{}", name, count);
-                        count += 1;
-                    }
+                    let name = Self::generate_name(rng, &names);
                     names.insert(device, name);
                     device
                 }).collect::<Vec<_>>())
                 .collect()
             })
+    }
+
+    fn generate_name<R>(rng: &mut R, names: &HashMap<Device, String>) -> String
+                where R: Rng {
+        let lhs = rng.choose(&LHS_WORDS).unwrap();
+        let rhs = rng.choose(&RHS_WORDS).unwrap();
+        let mut name = format!("{}_{}", lhs, rhs);
+        let mut count = 0;
+        while names.values().find(|n| **n == name).is_some() {
+            name = format!("{}{}", name, count);
+            count += 1;
+        }
+        name
     }
 
     pub fn get_device_name(&self, dev: &Device) -> Option<&String> {
