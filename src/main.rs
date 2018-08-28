@@ -15,10 +15,10 @@ use futures::sync::oneshot;
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
+use rami::device::device::{self, DeviceManager};
 use rami::device::driver::Driver;
-use rami::device::driver_spec::DriverSpec;
 use rami::device::driver_manager::DriverManager;
-use rami::device::device::{DeviceManager, self};
+use rami::device::driver_spec::DriverSpec;
 use rami::protos::main::*;
 use rami::protos::main_grpc::{self, Rami};
 
@@ -28,7 +28,11 @@ struct RamiService {
 }
 
 impl RamiService {
-    fn find_with_spec(&self, p_config: &Config, p_spec: Option<&DriverSpecification>) -> FindResponse {
+    fn find_with_spec(
+        &self,
+        p_config: &Config,
+        p_spec: Option<&DriverSpecification>,
+    ) -> FindResponse {
         let config: HashMap<String, serde_json::value::Value> = p_config
             .get_config()
             .iter()
@@ -37,10 +41,15 @@ impl RamiService {
                     pair.get_key().to_string(),
                     serde_json::from_str(pair.get_value()).unwrap(),
                 )
-            })
-            .collect();
+            }).collect();
         let spec = if let Some(p) = p_spec {
-            let empty_or = |v| { if v == "" { None } else { Some(v) } };
+            let empty_or = |v| {
+                if v == "" {
+                    None
+                } else {
+                    Some(v)
+                }
+            };
             let vendor = p.get_vendor().to_string();
             let category = p.get_category().to_string();
             let name = p.get_name().to_string();
@@ -75,9 +84,7 @@ impl RamiService {
     }
 }
 
-
 impl Rami for RamiService {
-
     fn list(&self, ctx: RpcContext, req: Config, sink: UnarySink<FindResponse>) {
         let resp = self.find_with_spec(&req, None);
         let f = sink

@@ -1,5 +1,5 @@
-extern crate rami;
 extern crate libloading;
+extern crate rami;
 
 use rami::device::driver::Driver;
 
@@ -9,4 +9,3 @@ fn main() {
     let driver = Driver::new(path).unwrap();
     println!("Good: {:?}", driver.validate());
 }
-

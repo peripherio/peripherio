@@ -5,4 +5,3 @@ use std::collections::HashMap;
 
 pub type ConfigValue = Value;
 pub type Config = HashMap<String, ConfigValue>;
-

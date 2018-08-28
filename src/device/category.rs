@@ -1,11 +1,11 @@
 use resolve::resolve;
 
-use serde_yaml;
 use failure::Error;
+use serde_yaml;
 
-use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Read;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 pub struct Category {
@@ -13,7 +13,7 @@ pub struct Category {
     path: PathBuf,
     version: String,
     author: Option<String>,
-    required_symbols: Vec<String>
+    required_symbols: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -33,7 +33,6 @@ impl FromStr for Category {
     }
 }
 
-
 impl Category {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
         resolve(name, "RAMI_CTG_PATH", "category.yml")
@@ -49,7 +48,7 @@ impl Category {
             name: metadata.name,
             author: metadata.author,
             version: metadata.version,
-            required_symbols: metadata.symbols
+            required_symbols: metadata.symbols,
         })
     }
 

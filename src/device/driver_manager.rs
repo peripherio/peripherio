@@ -1,22 +1,22 @@
 use config::Config;
 use device::driver::{Driver, DriverData};
 use device::driver_spec::DriverSpec;
-use resolve;
 use error::DriverNotFoundError;
+use resolve;
 
 use failure::Error;
 
+use std::collections::hash_map::{Iter, Keys};
 use std::collections::HashMap;
-use std::collections::hash_map::{Keys, Iter};
 
 pub struct DriverManager {
-    drivers: HashMap<Driver, DriverData>
+    drivers: HashMap<Driver, DriverData>,
 }
 
 impl DriverManager {
     pub fn new() -> Self {
         Self {
-            drivers: HashMap::new()
+            drivers: HashMap::new(),
         }
     }
 
@@ -41,7 +41,8 @@ impl DriverManager {
     }
 
     pub fn suitable_drivers(&self, spec: &DriverSpec, conf: &Config) -> Vec<Driver> {
-        self.drivers.iter()
+        self.drivers
+            .iter()
             .filter(move |(_, data)| spec.is_conforming(data))
             .filter(move |(_, data)| data.validate_config(conf))
             .map(|(drv, _)| drv)

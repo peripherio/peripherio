@@ -41,6 +41,10 @@ fn main() {
     // req.mut_config().push(get_pair("if.i2c.address", "0"));
     let reply = client.list(&req).expect("rpc");
     let end = start.elapsed();
-    println!("Elapsed time: {}ns({}ms)", end.subsec_nanos(), end.subsec_nanos() as f64 / 1000000.0);
+    println!(
+        "Elapsed time: {}ns({}ms)",
+        end.subsec_nanos(),
+        end.subsec_nanos() as f64 / 1000000.0
+    );
     println!("Received: {:?}", reply.get_results());
 }
