@@ -1,33 +1,48 @@
 use config::Config;
-use device::driver::Driver;
+use device::driver::{Driver, DriverData};
 use device::driver_spec::DriverSpec;
 use resolve;
 
 use failure::Error;
 
+use std::collections::HashMap;
+use std::collections::hash_map::Keys;
+
 pub struct DriverManager {
-    drivers: Vec<Driver>
+    drivers: HashMap<Driver, DriverData>
 }
 
 impl DriverManager {
     pub fn new() -> Self {
         Self {
-            drivers: Vec::new()
+            drivers: HashMap::new()
         }
     }
 
     pub fn load_all(&mut self) -> Result<(), Error> {
         self.drivers = resolve::paths("RAMI_PKG_PATH", "rami.yml")?
-            .map(|path| Driver::new(path))
-            .collect::<Result<_, _>>()?;
+            .enumerate()
+            .map(|(i, path)| Ok((Driver::new(i), DriverData::new(path)?)))
+            .collect::<Result<_, Error>>()?;
         Ok(())
     }
 
-    pub fn drivers(&self) -> &Vec<Driver> {
-        &self.drivers
+    pub fn driver_data(&self) -> impl Iterator<Item=(&Driver, &DriverData)> {
+        self.drivers.iter()
+    }
+
+    pub fn drivers(&self) -> Keys<Driver, DriverData> {
+        self.drivers.keys()
+    }
+
+    pub fn get_data(&self, drv: &Driver) -> Option<&DriverData> {
+        self.drivers.get(drv)
     }
 
     pub fn suitable_drivers<'a>(&'a self, spec: &'a DriverSpec, conf: &'a Config) -> impl Iterator<Item=&'a Driver> {
-        self.drivers.iter().filter(move |drv| spec.is_conforming(drv)).filter(move |drv| drv.validate_config(conf))
+        self.drivers.iter()
+            .filter(move |(_, data)| spec.is_conforming(data))
+            .filter(move |(_, data)| data.validate_config(conf))
+            .map(|(drv, _)| drv)
     }
 }
