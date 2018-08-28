@@ -52,7 +52,7 @@ message DeviceID {
 }
 
 message DriverSpecification {
-  repeated string category = 1;
+  string category = 1;
   string vendor = 2;
   string name = 3;
 }
