@@ -58,7 +58,7 @@ pub struct DriverData {
     driver: Library,
 }
 
-const COMMON_SYMBOLS: [&str; 2] = ["init", "detect"];
+pub const COMMON_SYMBOLS: [&str; 2] = ["init", "detect"];
 
 #[derive(Deserialize, Serialize)]
 struct RequirementData {
