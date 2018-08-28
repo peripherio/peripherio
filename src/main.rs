@@ -8,7 +8,7 @@ extern crate serde_json;
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::{io, thread};
 
 use futures::sync::oneshot;
@@ -18,12 +18,13 @@ use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 use rami::device::driver::Driver;
 use rami::device::driver_spec::DriverSpec;
 use rami::device::driver_manager::DriverManager;
+use rami::device::device::{DeviceManager, self};
 use rami::protos::main::*;
 use rami::protos::main_grpc::{self, Rami};
 
 #[derive(Clone)]
 struct RamiService {
-    manager: Arc<DriverManager>,
+    manager: Arc<Mutex<DeviceManager>>,
 }
 
 impl Rami for RamiService {
@@ -73,13 +74,9 @@ impl Rami for RamiService {
 
 fn main() {
     let env = Arc::new(Environment::new(1));
-    let mut manager = DriverManager::new();
-    if let Err(e) = manager.load_all() {
-        eprintln!("Error: {:?}", e);
-        return;
-    }
+    let mut manager = DeviceManager::new();
     let service = main_grpc::create_rami(RamiService {
-        manager: Arc::new(manager),
+        manager: Arc::new(Mutex::new(manager)),
     });
     let mut server = ServerBuilder::new(env)
         .register_service(service)
