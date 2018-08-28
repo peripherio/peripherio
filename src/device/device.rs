@@ -29,8 +29,8 @@ impl DeviceManager {
         inst
     }
 
-    pub fn driver_manager(self) -> DriverManager {
-        self.driver_manager
+    pub fn driver_manager(&self) -> &DriverManager {
+        &self.driver_manager
     }
 
     pub fn detect(&mut self, conf: Config, drivers: Option<&Vec<Driver>>) -> Result<Vec<Device>, Error> {
