@@ -40,10 +40,12 @@ impl DriverManager {
         self.drivers.get(drv).ok_or(DriverNotFoundError.into())
     }
 
-    pub fn suitable_drivers<'a>(&'a self, spec: &'a DriverSpec, conf: &'a Config) -> impl Iterator<Item=&'a Driver> {
+    pub fn suitable_drivers(&self, spec: &DriverSpec, conf: &Config) -> Vec<Driver> {
         self.drivers.iter()
             .filter(move |(_, data)| spec.is_conforming(data))
             .filter(move |(_, data)| data.validate_config(conf))
             .map(|(drv, _)| drv)
+            .cloned()
+            .collect()
     }
 }
