@@ -2,6 +2,7 @@ use config::Config;
 use device::driver::{Driver, DriverData};
 use device::driver_spec::DriverSpec;
 use resolve;
+use error::DriverNotFoundError;
 
 use failure::Error;
 
@@ -35,8 +36,8 @@ impl DriverManager {
         self.drivers.keys()
     }
 
-    pub fn get_data(&self, drv: &Driver) -> Option<&DriverData> {
-        self.drivers.get(drv)
+    pub fn get_data(&self, drv: &Driver) -> Result<&DriverData, Error> {
+        self.drivers.get(drv).ok_or(DriverNotFoundError.into())
     }
 
     pub fn suitable_drivers<'a>(&'a self, spec: &'a DriverSpec, conf: &'a Config) -> impl Iterator<Item=&'a Driver> {
