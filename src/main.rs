@@ -39,13 +39,30 @@ impl Rami for RamiService {
                 )
             })
             .collect();
-        let manager = self.manager.clone();
         let spec = DriverSpec::new(None, None, None);
-        let drivers: Vec<&Driver> = manager.suitable_drivers(&spec, &config).collect();
+        let manager = self.manager.clone();
+        let mut manager = manager.lock().unwrap();
+        let drivers: Vec<Driver> = manager.driver_manager().suitable_drivers(&spec, &config);
+        let devices = manager.detect(config, Some(&drivers)).unwrap();
 
-        let device = Device::new();
         let mut resp = FindResponse::new();
-        resp.mut_results().push(device);
+        for device in devices {
+            let mut res = FindResponse_DetectResult::new();
+            let mut p_id = DeviceID::new();
+            p_id.set_id(device.id() as u64);
+            res.set_id(p_id);
+            res.set_display_name(manager.get_device_name(&device).unwrap().clone());
+            let config = manager.get_device_config(&device).unwrap();
+            let mut p_config = Config::new();
+            for (k, v) in config {
+                let mut pair = Config_Pair::new();
+                pair.set_key(k.clone());
+                pair.set_value(serde_json::to_string(v).unwrap());
+                p_config.mut_config().push(pair);
+            }
+            res.set_config(p_config);
+            resp.mut_results().push(res);
+        }
         let f = sink
             .success(resp)
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
