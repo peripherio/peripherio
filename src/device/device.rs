@@ -36,7 +36,7 @@ impl DeviceManager {
     }
 
     pub fn detect(&mut self, conf: Config) -> Result<Vec<Device>, Error> {
-        let &mut Self { ref mut devices, ref mut names, ref mut driver_manager, ref mut rng, .. } = self;
+        let &mut Self { ref mut devices, ref mut names, ref driver_manager, ref mut rng, .. } = self;
         driver_manager.driver_data()
             .map(|(drv, data)| Ok((*drv, data.detect(&conf)?)))
             .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()
