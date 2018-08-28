@@ -114,7 +114,7 @@ impl Rami for RamiService {
 
 fn main() {
     let env = Arc::new(Environment::new(1));
-    let mut manager = DeviceManager::new();
+    let mut manager = DeviceManager::new().unwrap();
     let service = main_grpc::create_rami(RamiService {
         manager: Arc::new(Mutex::new(manager)),
     });

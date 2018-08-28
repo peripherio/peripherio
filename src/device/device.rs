@@ -25,14 +25,14 @@ pub struct DeviceManager {
 }
 
 impl DeviceManager {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, Error> {
         let mut inst = Self {
             driver_manager: DriverManager::new(),
             devices: HashMap::new(),
             names: HashMap::new(),
         };
-        inst.driver_manager.load_all();
-        inst
+        inst.driver_manager.load_all()?;
+        Ok(inst)
     }
 
     pub fn driver_manager(&self) -> &DriverManager {
