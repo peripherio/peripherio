@@ -64,7 +64,7 @@ impl Category {
         &self.name
     }
 
-    pub fn required_symbols(&self) -> &Vec<String> {
-        &self.required_symbols
+    pub fn required_symbols(&self) -> impl Iterator<Item = &String> {
+        self.required_signatures.keys()
     }
 }

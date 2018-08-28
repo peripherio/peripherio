@@ -150,7 +150,7 @@ impl DriverData {
     pub fn validate_symbols(&self) -> bool {
         self.category
             .iter()
-            .flat_map(|ctg| ctg.required_symbols().iter())
+            .flat_map(|ctg| ctg.required_symbols())
             .map(AsRef::as_ref)
             .chain(COMMON_SYMBOLS.into_iter().map(|e| *e))
             .all(|sym| unsafe { self.get::<fn(u32) -> u32>(sym) }.is_ok())
