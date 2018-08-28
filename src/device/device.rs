@@ -35,9 +35,12 @@ impl DeviceManager {
         self.driver_manager
     }
 
-    pub fn detect(&mut self, conf: Config) -> Result<Vec<Device>, Error> {
+    pub fn detect(&mut self, conf: Config, drivers: Option<&Vec<Driver>>) -> Result<Vec<Device>, Error> {
         let &mut Self { ref mut devices, ref mut names, ref driver_manager, ref mut rng, .. } = self;
-        driver_manager.driver_data()
+        drivers.map(|devs|
+                devs.into_iter().map(|dev| Ok((dev, driver_manager.get_data(dev)?))).collect::<Result<HashMap<&Driver, &DriverData>, Error>>()
+            ).map_or(Ok(None), |v| v.map(|a|Some(a.into_iter().into())))?
+            .unwrap_or(driver_manager.driver_data().collect::<HashMap<_, _>>().into_iter())
             .map(|(drv, data)| Ok((*drv, data.detect(&conf)?)))
             .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()
             .map(|v| {

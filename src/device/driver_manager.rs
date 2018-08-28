@@ -7,7 +7,7 @@ use error::DriverNotFoundError;
 use failure::Error;
 
 use std::collections::HashMap;
-use std::collections::hash_map::Keys;
+use std::collections::hash_map::{Keys, Iter};
 
 pub struct DriverManager {
     drivers: HashMap<Driver, DriverData>
@@ -28,7 +28,7 @@ impl DriverManager {
         Ok(())
     }
 
-    pub fn driver_data(&self) -> impl Iterator<Item=(&Driver, &DriverData)> {
+    pub fn driver_data(&self) -> Iter<'_, Driver, DriverData> {
         self.drivers.iter()
     }
 
