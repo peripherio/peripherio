@@ -42,7 +42,7 @@ message FindResponse {
 message Config {
   message Pair {
     string key = 1;
-    string value = 2; // JSON (FIXME)
+    bytes value = 2; // msgpack
   }
   repeated Pair config = 1;
 }
