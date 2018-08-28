@@ -27,11 +27,16 @@ message FindRequest {
 
 message PingRequest {
   Config config = 1;
-  Device device = 2;
+  DeviceID device = 2;
 }
 
 message FindResponse {
-  repeated Device results = 1;
+  message DetectResult {
+    DeviceID id = 1;
+    string display_name = 2;
+    Config config = 3;
+  }
+  repeated DetectResult results = 1;
 }
 
 message Config {
@@ -42,11 +47,8 @@ message Config {
   repeated Pair config = 1;
 }
 
-message Device {
-  // Maybe int32?
-  string id = 1;
-  string display_name = 2;
-  int32 priority = 3;
+message DeviceID {
+  uint64 id = 1;
 }
 
 message DriverSpecification {
