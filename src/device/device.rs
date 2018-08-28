@@ -39,7 +39,7 @@ impl DeviceManager {
             .map(|(drv, data)| Ok((*drv, data.detect(&conf)?)))
             .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()?
             .into_iter()
-            .map(|(drv, confs)| confs.into_iter().map(|c| {
+            .flat_map(|(drv, confs)| confs.into_iter().map(|c| {
                 let device = Device(devices.len());
                 devices.insert(device, DeviceData(drv, c));
                 let mut rng = thread_rng();
@@ -53,11 +53,8 @@ impl DeviceManager {
                     count += 1;
                 }
                 names.insert(device, name);
-                Ok(device)
-            }).collect::<Result<Vec<Device>, Error>>())
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .flat_map(|c| c)
+                device
+            }))
             .collect::<Vec<_>>();
         Ok(detected_devices)
     }
