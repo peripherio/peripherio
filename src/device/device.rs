@@ -37,27 +37,28 @@ impl DeviceManager {
 
     pub fn detect(&mut self, conf: Config) -> Result<Vec<Device>, Error> {
         let &mut Self { ref mut devices, ref mut names, ref mut driver_manager, ref mut rng, .. } = self;
-        let detected_devices = driver_manager.driver_data()
+        driver_manager.driver_data()
             .map(|(drv, data)| Ok((*drv, data.detect(&conf)?)))
-            .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()?
-            .into_iter()
-            .flat_map(|(drv, confs)| confs.into_iter().map(|c| {
-                let device = Device(devices.len());
-                devices.insert(device, DeviceData(drv, c));
-                let lhs = rng.choose(&LHS_WORDS).unwrap();
-                let rhs = rng.choose(&RHS_WORDS).unwrap();
-                let mut name = format!("{}_{}", lhs, rhs);
+            .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()
+            .map(|v| {
+                v.into_iter()
+                .flat_map(|(drv, confs)| confs.into_iter().map(|c| {
+                    let device = Device(devices.len());
+                    devices.insert(device, DeviceData(drv, c));
+                    let lhs = rng.choose(&LHS_WORDS).unwrap();
+                    let rhs = rng.choose(&RHS_WORDS).unwrap();
+                    let mut name = format!("{}_{}", lhs, rhs);
 
-                let mut count = 0;
-                while names.values().find(|n| **n == name).is_some() {
-                    name = format!("{}{}", name, count);
-                    count += 1;
-                }
-                names.insert(device, name);
-                device
-            }).collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-        Ok(detected_devices)
+                    let mut count = 0;
+                    while names.values().find(|n| **n == name).is_some() {
+                        name = format!("{}{}", name, count);
+                        count += 1;
+                    }
+                    names.insert(device, name);
+                    device
+                }).collect::<Vec<_>>())
+                .collect()
+            })
     }
 
     pub fn get_device_name(&self, dev: &Device) -> Option<&String> {
