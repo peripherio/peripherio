@@ -30,6 +30,19 @@ pub struct CannotResolveError {
 }
 
 #[derive(Fail, Debug)]
+#[fail(
+    display = "Cannot find all required symbols {:?} and {} in driver {}",
+    requires,
+    common,
+    name
+)]
+pub struct SymbolsNotEnoughError {
+    pub requires: Vec<String>,
+    pub common: String,
+    pub name: String,
+}
+
+#[derive(Fail, Debug)]
 #[fail(display = "Invalid Schema: {:?}", error)]
 pub struct SchemaError {
     pub error: json_schema::SchemaError,

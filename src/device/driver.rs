@@ -122,7 +122,7 @@ impl DriverData {
                     },
                 ))
             }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
-        Ok(DriverData {
+        let inst = DriverData {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,
             name: metadata.name,
@@ -131,7 +131,20 @@ impl DriverData {
             version: metadata.version,
             requires,
             category,
-        })
+        };
+        if !inst.validate_symbols() {
+            return Err(error::SymbolsNotEnoughError {
+                name: inst.name,
+                requires: inst
+                    .category
+                    .iter()
+                    .flat_map(|v| v.required_symbols())
+                    .cloned()
+                    .collect::<Vec<_>>(),
+                common: format!("{:?}", COMMON_SYMBOLS),
+            }.into());
+        }
+        Ok(inst)
     }
 
     pub fn validate_symbols(&self) -> bool {
