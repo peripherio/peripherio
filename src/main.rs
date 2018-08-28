@@ -87,9 +87,7 @@ impl Rami for RamiService {
     }
 
     fn find(&self, ctx: RpcContext, req: FindRequest, sink: UnarySink<FindResponse>) {
-        let device = Device::new();
-        let mut resp = FindResponse::new();
-        resp.mut_results().push(device);
+        let resp = self.find_with_spec(req.get_config(), Some(req.get_spec()));
         let f = sink
             .success(resp)
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
