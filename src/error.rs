@@ -2,6 +2,10 @@ use valico::json_schema;
 use serde_json::value::{Value, Number};
 
 #[derive(Fail, Debug)]
+#[fail(display = "Internal Error: Use of unknown driver id")]
+pub struct DriverNotFoundError;
+
+#[derive(Fail, Debug)]
 #[fail(display = "Cannot represent value \"{}\" in JSON format", value)]
 pub struct InvalidNumberError {
     pub value: f64

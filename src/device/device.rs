@@ -10,13 +10,18 @@ use std::collections::HashMap;
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Device(usize);
 
+impl Device {
+    pub fn id(&self) -> usize {
+        self.0
+    }
+}
+
 struct DeviceData(Driver, Config);
 
 pub struct DeviceManager {
     driver_manager: DriverManager,
     devices: HashMap<Device, DeviceData>,
-    names: HashMap<Device, String>,
-    rng: ThreadRng
+    names: HashMap<Device, String>
 }
 
 impl DeviceManager {
@@ -24,20 +29,22 @@ impl DeviceManager {
         let mut inst = Self {
             driver_manager: DriverManager::new(),
             devices: HashMap::new(),
-            names: HashMap::new(),
-            rng: thread_rng()
+            names: HashMap::new()
         };
         inst.driver_manager.load_all();
         inst
     }
 
-    pub fn driver_manager(self) -> DriverManager {
-        self.driver_manager
+    pub fn driver_manager(&self) -> &DriverManager {
+        &self.driver_manager
     }
 
-    pub fn detect(&mut self, conf: Config) -> Result<Vec<Device>, Error> {
-        let &mut Self { ref mut devices, ref mut names, ref driver_manager, ref mut rng, .. } = self;
-        driver_manager.driver_data()
+    pub fn detect(&mut self, conf: Config, drivers: Option<&Vec<Driver>>) -> Result<Vec<Device>, Error> {
+        let &mut Self { ref mut devices, ref mut names, ref driver_manager, .. } = self;
+        drivers.map(|devs|
+                devs.into_iter().map(|dev| Ok((dev, driver_manager.get_data(dev)?))).collect::<Result<HashMap<&Driver, &DriverData>, Error>>()
+            ).map_or(Ok(None), |v| v.map(|a|Some(a.into_iter().into())))?
+            .unwrap_or(driver_manager.driver_data().collect::<HashMap<_, _>>().into_iter())
             .map(|(drv, data)| Ok((*drv, data.detect(&conf)?)))
             .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()
             .map(|v| {
@@ -46,7 +53,7 @@ impl DeviceManager {
                     let device = Device(devices.len());
                     devices.insert(device, DeviceData(drv, c));
 
-                    let name = Self::generate_name(rng, &names);
+                    let name = Self::generate_name(&names);
                     names.insert(device, name);
                     device
                 }).collect::<Vec<_>>())
@@ -54,8 +61,8 @@ impl DeviceManager {
             })
     }
 
-    fn generate_name<R>(rng: &mut R, names: &HashMap<Device, String>) -> String
-                where R: Rng {
+    fn generate_name(names: &HashMap<Device, String>) -> String {
+        let mut rng = thread_rng();
         let lhs = rng.choose(&LHS_WORDS).unwrap();
         let rhs = rng.choose(&RHS_WORDS).unwrap();
         let mut name = format!("{}_{}", lhs, rhs);
