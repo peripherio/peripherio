@@ -15,7 +15,8 @@ struct DeviceData(Driver, Config);
 pub struct DeviceManager {
     driver_manager: DriverManager,
     devices: HashMap<Device, DeviceData>,
-    names: HashMap<Device, String>
+    names: HashMap<Device, String>,
+    rng: ThreadRng
 }
 
 impl DeviceManager {
@@ -23,7 +24,8 @@ impl DeviceManager {
         let mut inst = Self {
             driver_manager: DriverManager::new(),
             devices: HashMap::new(),
-            names: HashMap::new()
+            names: HashMap::new(),
+            rng: thread_rng()
         };
         inst.driver_manager.load_all();
         inst
@@ -34,7 +36,7 @@ impl DeviceManager {
     }
 
     pub fn detect(&mut self, conf: Config) -> Result<Vec<Device>, Error> {
-        let &mut Self { ref mut devices, ref mut names, ref mut driver_manager, .. } = self;
+        let &mut Self { ref mut devices, ref mut names, ref mut driver_manager, ref mut rng, .. } = self;
         let detected_devices = driver_manager.driver_data()
             .map(|(drv, data)| Ok((*drv, data.detect(&conf)?)))
             .collect::<Result<HashMap<Driver, Vec<Config>>, Error>>()?
@@ -42,7 +44,6 @@ impl DeviceManager {
             .flat_map(|(drv, confs)| confs.into_iter().map(|c| {
                 let device = Device(devices.len());
                 devices.insert(device, DeviceData(drv, c));
-                let mut rng = thread_rng();
                 let lhs = rng.choose(&LHS_WORDS).unwrap();
                 let rhs = rng.choose(&RHS_WORDS).unwrap();
                 let mut name = format!("{}_{}", lhs, rhs);
