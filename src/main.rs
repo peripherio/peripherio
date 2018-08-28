@@ -4,6 +4,7 @@
 extern crate futures;
 extern crate grpcio;
 extern crate rami;
+extern crate rmp_serde as rmps;
 extern crate serde_json;
 
 use std::collections::HashMap;
@@ -39,7 +40,7 @@ impl RamiService {
             .map(|pair| {
                 (
                     pair.get_key().to_string(),
-                    serde_json::from_str(pair.get_value()).unwrap(),
+                    rmps::from_slice(&pair.get_value()[..]).unwrap(),
                 )
             }).collect();
         let spec = if let Some(p) = p_spec {
@@ -74,7 +75,7 @@ impl RamiService {
             for (k, v) in config {
                 let mut pair = Config_Pair::new();
                 pair.set_key(k.clone());
-                pair.set_value(serde_json::to_string(v).unwrap());
+                pair.set_value(rmps::to_vec(v).unwrap());
                 p_config.mut_config().push(pair);
             }
             res.set_config(p_config);

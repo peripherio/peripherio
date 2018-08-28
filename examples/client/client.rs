@@ -13,6 +13,8 @@
 
 extern crate grpcio;
 extern crate rami;
+extern crate rmp_serde as rmps;
+extern crate serde;
 
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -21,10 +23,13 @@ use grpcio::{ChannelBuilder, EnvBuilder};
 use rami::protos::main::*;
 use rami::protos::main_grpc::RamiClient;
 
-fn get_pair(k: &str, v: &str) -> Config_Pair {
+fn get_pair<T: ?Sized>(k: &str, v: &T) -> Config_Pair
+where
+    T: serde::Serialize,
+{
     let mut pair = Config_Pair::new();
     pair.set_key(k.to_string());
-    pair.set_value(v.to_string());
+    pair.set_value(rmps::to_vec(v).unwrap());
     pair
 }
 
@@ -35,8 +40,8 @@ fn main() {
 
     let start = Instant::now();
     let mut req = Config::new();
-    req.mut_config().push(get_pair("if.type", "\"i2c\""));
-    req.mut_config().push(get_pair("if.i2c.speed", "100"));
+    req.mut_config().push(get_pair("if.type", "i2c"));
+    req.mut_config().push(get_pair("if.i2c.speed", &100));
     // req.mut_config().push(get_pair("if.i2c.busnum", "0"));
     // req.mut_config().push(get_pair("if.i2c.address", "0"));
     let reply = client.list(&req).expect("rpc");
