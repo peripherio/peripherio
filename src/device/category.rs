@@ -1,19 +1,27 @@
 use resolve::resolve;
 
 use failure::Error;
+use serde_json::value::Value;
 use serde_yaml;
 
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+
+#[derive(Deserialize)]
+struct Signature {
+    args: Value,
+    returns: Value,
+}
 
 pub struct Category {
     name: String,
     path: PathBuf,
     version: String,
     author: Option<String>,
-    required_symbols: Vec<String>,
+    required_signatures: HashMap<String, Signature>,
 }
 
 #[derive(Deserialize)]
@@ -21,7 +29,7 @@ struct LibMetaData {
     name: String,
     version: String,
     author: Option<String>,
-    symbols: Vec<String>,
+    signatures: HashMap<String, Signature>,
 }
 
 impl FromStr for Category {
@@ -48,7 +56,7 @@ impl Category {
             name: metadata.name,
             author: metadata.author,
             version: metadata.version,
-            required_symbols: metadata.symbols,
+            required_signatures: metadata.signatures,
         })
     }
 
