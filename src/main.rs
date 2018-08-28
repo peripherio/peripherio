@@ -27,9 +27,9 @@ struct RamiService {
     manager: Arc<Mutex<DeviceManager>>,
 }
 
-impl Rami for RamiService {
-    fn list(&self, ctx: RpcContext, req: Config, sink: UnarySink<FindResponse>) {
-        let config: HashMap<String, serde_json::value::Value> = req
+impl RamiService {
+    fn find_with_spec(&self, p_config: &Config, p_spec: Option<&DriverSpecification>) -> FindResponse {
+        let config: HashMap<String, serde_json::value::Value> = p_config
             .get_config()
             .iter()
             .map(|pair| {
@@ -39,7 +39,15 @@ impl Rami for RamiService {
                 )
             })
             .collect();
-        let spec = DriverSpec::new(None, None, None);
+        let spec = if let Some(p) = p_spec {
+            let empty_or = |v| { if v == "" { None } else { Some(v) } };
+            let vendor = p.get_vendor().to_string();
+            let category = p.get_category().to_string();
+            let name = p.get_name().to_string();
+            DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
+        } else {
+            DriverSpec::new(None, None, None)
+        };
         let manager = self.manager.clone();
         let mut manager = manager.lock().unwrap();
         let drivers: Vec<Driver> = manager.driver_manager().suitable_drivers(&spec, &config);
@@ -63,6 +71,15 @@ impl Rami for RamiService {
             res.set_config(p_config);
             resp.mut_results().push(res);
         }
+        resp
+    }
+}
+
+
+impl Rami for RamiService {
+
+    fn list(&self, ctx: RpcContext, req: Config, sink: UnarySink<FindResponse>) {
+        let resp = self.find_with_spec(&req, None);
         let f = sink
             .success(resp)
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
