@@ -10,6 +10,12 @@ use std::collections::HashMap;
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Device(usize);
 
+impl Device {
+    pub fn id(&self) -> usize {
+        self.0
+    }
+}
+
 struct DeviceData(Driver, Config);
 
 pub struct DeviceManager {
