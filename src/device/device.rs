@@ -54,7 +54,7 @@ impl DeviceManager {
                 }
                 names.insert(device, name);
                 device
-            }))
+            }).collect::<Vec<_>>())
             .collect::<Vec<_>>();
         Ok(detected_devices)
     }
