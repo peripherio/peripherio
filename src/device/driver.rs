@@ -18,6 +18,16 @@ use std::io::Read;
 use std::collections::HashMap;
 use std::{fmt, mem, ptr, slice};
 
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub struct Driver(usize);
+
+impl Driver {
+    pub fn new(id: usize) -> Self {
+        Driver (id)
+    }
+}
+
 pub struct Requirement {
     detects: bool,
     schema: Option<Schema>,
@@ -38,7 +48,7 @@ impl Requirement {
     }
 }
 
-pub struct Driver {
+pub struct DriverData {
     path: PathBuf,
     name: String,
     version: String,
@@ -68,7 +78,7 @@ struct LibMetaData {
     requires: LinkedHashMap<String, RequirementData>
 }
 
-impl Driver {
+impl DriverData {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
         resolve(name, "RAMI_PKG_PATH", "rami.yml")
     }
@@ -92,7 +102,7 @@ impl Driver {
                 type_str
             }))
         }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
-        Ok(Driver {
+        Ok(DriverData {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,
             name: metadata.name,
