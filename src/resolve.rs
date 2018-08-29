@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 pub fn resolve(name: &str, environ: &'static str, file: &'static str) -> Result<PathBuf, Error> {
     paths(environ, file)?
-        .find(|path| path.join(file).is_file())
+        .find(|path| path.ends_with(name))
         .map(|path| path.to_path_buf())
         .ok_or(
             CannotResolveError {
