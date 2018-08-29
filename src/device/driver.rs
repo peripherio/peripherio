@@ -1,4 +1,5 @@
 use config::{Config, ConfigValue};
+use config::global::GLOBAL_SCHEMA;
 use device::category::Category;
 use device::libloading::{Library, Symbol};
 use error;
@@ -129,6 +130,18 @@ impl DriverData {
 
     pub fn validate_config(&self, config: &Config) -> bool {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
+    }
+
+    pub fn merged_schemas(&self) -> HashMap<String, serde_json::Value> {
+        let mut gen = GLOBAL_SCHEMA.clone();
+        for (key, schema) in &self.schemas {
+            if let Some(ref mut v) = gen.get_mut(key) {
+                util::merge_value(v, &schema);
+                continue;
+            }
+            gen.insert(key.clone(), schema.clone());
+        }
+        gen
     }
 
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {

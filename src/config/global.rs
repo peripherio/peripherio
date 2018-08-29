@@ -6,9 +6,9 @@ use valico::json_schema::{keywords, Scope};
 use std::collections::HashMap;
 
 lazy_static! {
-    static ref GLOBAL_SCHEMA: HashMap<&'static str, ConfigValue> = vec![
+    pub static ref GLOBAL_SCHEMA: HashMap<String, ConfigValue> = vec![
         (
-            "if.type",
+            "if.type".to_string(),
             json!({
                 "type": "string",
                 "enum": [
@@ -19,13 +19,13 @@ lazy_static! {
             })
         ),
         (
-            "if.i2c.busnum",
+            "if.i2c.busnum".to_string(),
             json!({
                 "type": "integer"
             })
         ),
         (
-            "if.i2c.address",
+            "if.i2c.address".to_string(),
             json!({
                 "type": "integer"
             })
