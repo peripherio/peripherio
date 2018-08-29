@@ -17,9 +17,9 @@ use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
 use rami::device::device::{self, DeviceManager};
-use rami::device::driver::Driver;
-use rami::device::driver_manager::DriverManager;
-use rami::device::driver_spec::DriverSpec;
+use rami::driver::driver::Driver;
+use rami::driver::driver_manager::DriverManager;
+use rami::driver::driver_spec::DriverSpec;
 use rami::protos::main::*;
 use rami::protos::main_grpc::{self, Rami};
 

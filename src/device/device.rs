@@ -1,6 +1,6 @@
 use config::Config;
-use device::driver::{Driver, DriverData};
-use device::driver_manager::DriverManager;
+use driver::driver::{Driver, DriverData};
+use driver::driver_manager::DriverManager;
 
 use failure::Error;
 use rand::{thread_rng, Rng, ThreadRng};

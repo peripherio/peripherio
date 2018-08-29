@@ -1,7 +1,7 @@
 use config::global::GLOBAL_SCHEMA;
 use config::{Config, ConfigValue};
-use device::category::{Category, Signature};
-use device::libloading::{Library, Symbol};
+use category::{Category, Signature};
+use driver::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
 use util;

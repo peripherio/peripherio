@@ -1,5 +1,8 @@
 pub mod config;
 pub mod device;
+pub mod driver;
+
+pub mod category;
 pub mod error;
 pub mod protos;
 pub mod resolve;
