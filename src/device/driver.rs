@@ -119,7 +119,10 @@ impl DriverData {
         self.schemas
             .get(key)
             .map(|schema_data| {
-                let sschema = scope.compile_and_return(schema_data.clone(), true).ok().unwrap();
+                let sschema = scope
+                    .compile_and_return(schema_data.clone(), true)
+                    .ok()
+                    .unwrap();
                 sschema.validate(value).is_valid()
             }).unwrap_or(true)
     }
