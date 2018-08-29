@@ -114,7 +114,8 @@ impl Rami for RamiService {
             let device_id = req.get_device();
             let device = device::Device::with_id(device_id.get_id() as usize);
             let command = req.get_command();
-            let args: HashMap<String, serde_json::Value> = rmps::from_slice(&req.get_args()[..]).unwrap();
+            let args: HashMap<String, serde_json::Value> =
+                rmps::from_slice(&req.get_args()[..]).unwrap();
 
             let manager = self.manager.clone();
             let mut manager = manager.lock().unwrap();

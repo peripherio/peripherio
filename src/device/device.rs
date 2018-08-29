@@ -13,5 +13,3 @@ impl Device {
         self.0
     }
 }
-
-
