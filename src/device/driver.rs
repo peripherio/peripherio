@@ -1,6 +1,6 @@
-use config::{Config, ConfigValue};
 use config::global::GLOBAL_SCHEMA;
-use device::category::Category;
+use config::{Config, ConfigValue};
+use device::category::{Category, Signature};
 use device::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
@@ -153,6 +153,38 @@ impl DriverData {
 
     pub fn validate_config(&self, config: &Config) -> bool {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
+    }
+
+    pub fn dispatch(
+        &self,
+        command: &str,
+        args: &HashMap<String, serde_json::Value>,
+        conf: &Config,
+    ) -> Result<HashMap<String, serde_json::Value>, Error> {
+        let category: &Category = self
+            .category
+            .iter()
+            .find(|v| {
+                v.required_symbols()
+                    .collect::<Vec<_>>()
+                    .contains(&&command.to_string())
+            }).ok_or(
+                Error::from(error::UnknownCommandError {
+                    name: command.to_string(),
+                }),
+            )?;
+
+        let Signature { args: args_sig, returns: returns_sig } = category.signatures().get(command).unwrap();
+        let args_schema = args_sig.clone().unwrap_or_default();
+        let (conf_buf, conf_buf_size) = util::value_to_c_struct(&self.merged_schemas, conf)?;
+        let (args_buf, args_buf_size) = util::value_to_c_struct(&args_schema, args)?;
+
+        let command = unsafe { self.get::<fn(*const u8, *const u8) -> *const u8>(command)? };
+        let returns = command(args_buf, conf_buf);
+        unsafe { util::free(conf_buf, conf_buf_size) };
+        unsafe { util::free(args_buf, args_buf_size) };
+        let returns_schema = returns_sig.clone().unwrap_or_default();
+        util::c_struct_to_value(&returns_schema, returns)
     }
 
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {

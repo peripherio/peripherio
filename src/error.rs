@@ -6,6 +6,12 @@ use valico::json_schema;
 pub struct DriverNotFoundError;
 
 #[derive(Fail, Debug)]
+#[fail(display = "Unknown command: {}", name)]
+pub struct UnknownCommandError {
+    pub name: String,
+}
+
+#[derive(Fail, Debug)]
 #[fail(display = "Use of unknown config key: {}", name)]
 pub struct UnknownConfigError {
     pub name: String,
