@@ -12,8 +12,8 @@ use std::str::FromStr;
 
 #[derive(Deserialize)]
 struct Signature {
-    args: Option<Value>,
-    returns: Option<Value>,
+    args: Option<HashMap<String, Value>>,
+    returns: Option<HashMap<String, Value>>,
 }
 
 pub struct Category {
