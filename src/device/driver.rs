@@ -117,7 +117,8 @@ impl DriverData {
 
     pub fn validate_config_value(&self, key: &str, value: &ConfigValue) -> bool {
         let mut scope = Scope::new();
-        self.schemas
+        self.merged_schemas()
+            .unwrap() // FIXME
             .get(key)
             .map(|schema_data| {
                 let sschema = scope
@@ -155,7 +156,7 @@ impl DriverData {
     }
 
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
-        let (buf, entire_size) = util::value_to_c_struct(&self.schemas, conf)?;
+        let (buf, entire_size) = util::value_to_c_struct(&self.merged_schemas()?, conf)?;
         let detect =
             unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect")? };
         let mut ret_size: usize = 0;
@@ -164,7 +165,7 @@ impl DriverData {
         let ary_of_conf = unsafe { slice::from_raw_parts(res, ret_size) };
         ary_of_conf
             .iter()
-            .map(|ret_conf| util::c_struct_to_value(&self.schemas, *ret_conf))
+            .map(|ret_conf| util::c_struct_to_value(&self.merged_schemas()?, *ret_conf))
             .collect()
     }
 
