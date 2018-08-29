@@ -27,26 +27,6 @@ impl Driver {
     }
 }
 
-pub struct Requirement {
-    detects: bool,
-    schema: Option<Schema>,
-    type_str: String,
-}
-
-impl Requirement {
-    pub fn schema(&self) -> &Option<Schema> {
-        &self.schema
-    }
-
-    pub fn detects(&self) -> bool {
-        self.detects
-    }
-
-    pub fn type_str(&self) -> &String {
-        &self.type_str
-    }
-}
-
 pub struct DriverData {
     path: PathBuf,
     name: String,
@@ -54,17 +34,13 @@ pub struct DriverData {
     author: Option<String>,
     vendor: Option<String>,
     category: Vec<Category>,
-    requires: LinkedHashMap<String, Requirement>,
+    requires: Vec<String>,
+    detects: Vec<String>,
+    schemas: LinkedHashMap<String, serde_json::Value>,
     driver: Library,
 }
 
 pub const COMMON_SYMBOLS: [&str; 2] = ["init", "detect"];
-
-#[derive(Deserialize, Serialize)]
-struct RequirementData {
-    detects: Option<bool>,
-    schema: Option<serde_json::Value>,
-}
 
 #[derive(Deserialize, Serialize)]
 struct LibMetaData {
@@ -74,7 +50,15 @@ struct LibMetaData {
     vendor: Option<String>,
     category: Vec<String>,
     driver: Option<String>,
-    requires: LinkedHashMap<String, RequirementData>,
+
+    /// What user must specify
+    requires: Option<Vec<String>>,
+
+    /// Driver can detect them via `detect()`, also use can specify them via config
+    detects: Option<Vec<String>>,
+
+    /// Schema for user's specification
+    schemas: Option<LinkedHashMap<String, serde_json::Value>>,
 }
 
 impl DriverData {
@@ -94,34 +78,6 @@ impl DriverData {
             .iter()
             .map(|c| c.parse())
             .collect::<Result<Vec<_>, _>>()?;
-        let requires = metadata
-            .requires
-            .into_iter()
-            .map(|(k, v)| {
-                let type_str = v
-                    .schema
-                    .as_ref()
-                    .and_then(|schema| schema["type"].as_str())
-                    .unwrap_or("integer")
-                    .to_string();
-                let compiled_schema = v
-                    .schema
-                    .map(|schema| {
-                        schema::compile(
-                            schema,
-                            None,
-                            CompilationSettings::new(&keywords::default(), true),
-                        ).map_err(|e| error::SchemaError::from(e))
-                    }).map_or(Ok(None), |r| r.map(Some))?;
-                Ok((
-                    k,
-                    Requirement {
-                        detects: v.detects.unwrap_or(false),
-                        schema: compiled_schema,
-                        type_str,
-                    },
-                ))
-            }).collect::<Result<LinkedHashMap<String, Requirement>, Error>>()?;
         let inst = DriverData {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,
@@ -129,7 +85,9 @@ impl DriverData {
             author: metadata.author,
             vendor: metadata.vendor,
             version: metadata.version,
-            requires,
+            requires: metadata.requires.unwrap_or_default(),
+            detects: metadata.detects.unwrap_or_default(),
+            schemas: metadata.schemas.unwrap_or_default(),
             category,
         };
         if !inst.validate_symbols() {
