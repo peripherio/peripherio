@@ -14,6 +14,19 @@ service Rami {
   rpc List(Config) returns (FindResponse) {}
   rpc Find(FindRequest) returns (FindResponse) {}
   rpc PingDevice(PingRequest) returns (PingResponse) {}
+
+  /* Command Dispatchment calls */
+  rpc Dispatch(DispatchRequest) returns (DispatchResponse) {}
+}
+
+message DispatchRequest {
+  DeviceID device = 1;
+  string command = 2;
+  bytes args = 3; // msgpack
+}
+
+message DispatchResponse {
+  bytes rets = 1; // msgpack
 }
 
 message PingResponse {
