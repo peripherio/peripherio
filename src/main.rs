@@ -16,10 +16,8 @@ use futures::sync::oneshot;
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
-use rami::device::device::{self, DeviceManager};
-use rami::device::driver::Driver;
-use rami::device::driver_manager::DriverManager;
-use rami::device::driver_spec::DriverSpec;
+use rami::device::{self, DeviceManager};
+use rami::driver::{Driver, DriverManager, DriverSpec};
 use rami::protos::main::*;
 use rami::protos::main_grpc::{self, Rami};
 
@@ -116,7 +114,8 @@ impl Rami for RamiService {
             let device_id = req.get_device();
             let device = device::Device::with_id(device_id.get_id() as usize);
             let command = req.get_command();
-            let args: HashMap<String, serde_json::Value> = rmps::from_slice(&req.get_args()[..]).unwrap();
+            let args: HashMap<String, serde_json::Value> =
+                rmps::from_slice(&req.get_args()[..]).unwrap();
 
             let manager = self.manager.clone();
             let mut manager = manager.lock().unwrap();

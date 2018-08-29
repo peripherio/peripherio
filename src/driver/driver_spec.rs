@@ -1,4 +1,4 @@
-use device::driver::DriverData;
+use driver::driver::DriverData;
 
 pub struct DriverSpec {
     vendor: Option<String>,

@@ -1,7 +1,7 @@
+use category::{Category, Signature};
 use config::global::GLOBAL_SCHEMA;
 use config::{Config, ConfigValue};
-use device::category::{Category, Signature};
-use device::libloading::{Library, Symbol};
+use driver::libloading::{Library, Symbol};
 use error;
 use resolve::resolve;
 use util;
@@ -164,17 +164,15 @@ impl DriverData {
         let category: &Category = self
             .category
             .iter()
-            .find(|v| {
-                v.required_symbols()
-                    .find(|sym| sym == &command)
-                    .is_some()
-            }).ok_or(
-                Error::from(error::UnknownCommandError {
-                    name: command.to_string(),
-                }),
-            )?;
+            .find(|v| v.required_symbols().find(|sym| sym == &command).is_some())
+            .ok_or(Error::from(error::UnknownCommandError {
+                name: command.to_string(),
+            }))?;
 
-        let Signature { args: args_sig, returns: returns_sig } = category.signatures().get(command).unwrap();
+        let Signature {
+            args: args_sig,
+            returns: returns_sig,
+        } = category.signatures().get(command).unwrap();
         let args_schema = args_sig.clone().unwrap_or_default();
         let (conf_buf, conf_buf_size) = util::value_to_c_struct(&self.merged_schemas, conf)?;
         let (args_buf, args_buf_size) = util::value_to_c_struct(&args_schema, args)?;

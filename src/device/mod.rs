@@ -1,7 +1,5 @@
-pub mod category;
 pub mod device;
-pub mod driver;
-pub mod driver_manager;
-pub mod driver_spec;
+pub mod device_manager;
 
-extern crate libloading;
+pub use device::device::Device;
+pub use device::device_manager::DeviceManager;

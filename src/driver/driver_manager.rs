@@ -1,6 +1,6 @@
 use config::Config;
-use device::driver::{Driver, DriverData};
-use device::driver_spec::DriverSpec;
+use driver::driver::{Driver, DriverData};
+use driver::driver_spec::DriverSpec;
 use error::DriverNotFoundError;
 use resolve;
 
