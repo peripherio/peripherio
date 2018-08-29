@@ -1,6 +1,7 @@
 use resolve::resolve;
 
 use failure::Error;
+use linked_hash_map::LinkedHashMap;
 use serde_json::value::Value;
 use serde_yaml;
 
@@ -11,9 +12,9 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 #[derive(Deserialize)]
-struct Signature {
-    args: Option<HashMap<String, Value>>,
-    returns: Option<HashMap<String, Value>>,
+pub struct Signature {
+    pub args: Option<LinkedHashMap<String, Value>>,
+    pub returns: Option<LinkedHashMap<String, Value>>,
 }
 
 pub struct Category {
@@ -66,5 +67,9 @@ impl Category {
 
     pub fn required_symbols(&self) -> impl Iterator<Item = &String> {
         self.required_signatures.keys()
+    }
+
+    pub fn signatures(&self) -> &HashMap<String, Signature> {
+        &self.required_signatures
     }
 }
