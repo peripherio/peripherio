@@ -6,6 +6,18 @@ use valico::json_schema;
 pub struct DriverNotFoundError;
 
 #[derive(Fail, Debug)]
+#[fail(display = "Unknown command: {}", name)]
+pub struct UnknownCommandError {
+    pub name: String,
+}
+
+#[derive(Fail, Debug)]
+#[fail(display = "Use of unknown config key: {}", name)]
+pub struct UnknownConfigError {
+    pub name: String,
+}
+
+#[derive(Fail, Debug)]
 #[fail(
     display = "Cannot represent value \"{}\" in JSON format",
     value
@@ -24,8 +36,26 @@ pub struct InvalidJSONNumberError {
 }
 
 #[derive(Fail, Debug)]
+#[fail(display = "Cannot find type from schema \"{}\"", field)]
+pub struct TypeNotFoundError {
+    pub field: String,
+}
+#[derive(Fail, Debug)]
 #[fail(display = "Cannot resolve name {}", name)]
 pub struct CannotResolveError {
+    pub name: String,
+}
+
+#[derive(Fail, Debug)]
+#[fail(
+    display = "Cannot find all required symbols {:?} and {} in driver {}",
+    requires,
+    common,
+    name
+)]
+pub struct SymbolsNotEnoughError {
+    pub requires: Vec<String>,
+    pub common: String,
     pub name: String,
 }
 

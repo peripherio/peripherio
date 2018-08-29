@@ -11,6 +11,10 @@ use std::collections::HashMap;
 pub struct Device(usize);
 
 impl Device {
+    pub fn with_id(id: usize) -> Self {
+        Device(id)
+    }
+
     pub fn id(&self) -> usize {
         self.0
     }
@@ -25,14 +29,14 @@ pub struct DeviceManager {
 }
 
 impl DeviceManager {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, Error> {
         let mut inst = Self {
             driver_manager: DriverManager::new(),
             devices: HashMap::new(),
             names: HashMap::new(),
         };
-        inst.driver_manager.load_all();
-        inst
+        inst.driver_manager.load_all()?;
+        Ok(inst)
     }
 
     pub fn driver_manager(&self) -> &DriverManager {
@@ -95,6 +99,10 @@ impl DeviceManager {
 
     pub fn get_device_name(&self, dev: &Device) -> Option<&String> {
         self.names.get(dev)
+    }
+
+    pub fn get_device_driver(&self, dev: &Device) -> Option<&Driver> {
+        self.devices.get(dev).map(|data| &data.0)
     }
 
     pub fn get_device_config(&self, dev: &Device) -> Option<&Config> {

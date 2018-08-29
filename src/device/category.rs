@@ -1,19 +1,28 @@
 use resolve::resolve;
 
 use failure::Error;
+use linked_hash_map::LinkedHashMap;
+use serde_json::value::Value;
 use serde_yaml;
 
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+
+#[derive(Deserialize)]
+pub struct Signature {
+    pub args: Option<LinkedHashMap<String, Value>>,
+    pub returns: Option<LinkedHashMap<String, Value>>,
+}
 
 pub struct Category {
     name: String,
     path: PathBuf,
     version: String,
     author: Option<String>,
-    required_symbols: Vec<String>,
+    required_signatures: HashMap<String, Signature>,
 }
 
 #[derive(Deserialize)]
@@ -21,7 +30,7 @@ struct LibMetaData {
     name: String,
     version: String,
     author: Option<String>,
-    symbols: Vec<String>,
+    signatures: HashMap<String, Signature>,
 }
 
 impl FromStr for Category {
@@ -48,7 +57,7 @@ impl Category {
             name: metadata.name,
             author: metadata.author,
             version: metadata.version,
-            required_symbols: metadata.symbols,
+            required_signatures: metadata.signatures,
         })
     }
 
@@ -56,7 +65,11 @@ impl Category {
         &self.name
     }
 
-    pub fn required_symbols(&self) -> &Vec<String> {
-        &self.required_symbols
+    pub fn required_symbols(&self) -> impl Iterator<Item = &String> {
+        self.required_signatures.keys()
+    }
+
+    pub fn signatures(&self) -> &HashMap<String, Signature> {
+        &self.required_signatures
     }
 }

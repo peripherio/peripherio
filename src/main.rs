@@ -110,11 +110,37 @@ impl Rami for RamiService {
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
         ctx.spawn(f)
     }
+
+    fn dispatch(&self, ctx: RpcContext, req: DispatchRequest, sink: UnarySink<DispatchResponse>) {
+        let resp = {
+            let device_id = req.get_device();
+            let device = device::Device::with_id(device_id.get_id() as usize);
+            let command = req.get_command();
+            let args: HashMap<String, serde_json::Value> = rmps::from_slice(&req.get_args()[..]).unwrap();
+
+            let manager = self.manager.clone();
+            let mut manager = manager.lock().unwrap();
+
+            let driver = manager.get_device_driver(&device).unwrap();
+            let config = manager.get_device_config(&device).unwrap();
+
+            let driver_data = manager.driver_manager().get_data(driver).unwrap();
+            let return_data = driver_data.dispatch(command, &args, config).unwrap();
+
+            let mut resp = DispatchResponse::new();
+            resp.set_rets(rmps::to_vec(&return_data).unwrap());
+            resp
+        };
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
 }
 
 fn main() {
     let env = Arc::new(Environment::new(1));
-    let mut manager = DeviceManager::new();
+    let mut manager = DeviceManager::new().unwrap();
     let service = main_grpc::create_rami(RamiService {
         manager: Arc::new(Mutex::new(manager)),
     });

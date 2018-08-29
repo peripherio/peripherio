@@ -6,9 +6,9 @@ use valico::json_schema::{keywords, Scope};
 use std::collections::HashMap;
 
 lazy_static! {
-    static ref GLOBAL_SCHEMA: HashMap<&'static str, Schema> = vec![
+    pub static ref GLOBAL_SCHEMA: HashMap<String, ConfigValue> = vec![
         (
-            "if.type",
+            "if.type".to_string(),
             json!({
                 "type": "string",
                 "enum": [
@@ -19,34 +19,30 @@ lazy_static! {
             })
         ),
         (
-            "if.i2c.busnum",
+            "if.i2c.busnum".to_string(),
             json!({
                 "type": "integer"
             })
         ),
         (
-            "if.i2c.address",
+            "if.i2c.address".to_string(),
             json!({
                 "type": "integer"
             })
         ),
     ].into_iter()
-    .map(|(k, v)| (
-        k,
-        schema::compile(
-            v,
-            None,
-            CompilationSettings::new(&keywords::default(), true)
-        ).unwrap()
-    )).collect();
+    .collect();
 }
 
 pub fn validate_config_value(key: &str, value: &ConfigValue) -> bool {
-    let scope = Scope::new();
+    let mut scope = Scope::new();
     GLOBAL_SCHEMA
         .get(key)
-        .map(|schema| {
-            let sschema = ScopedSchema::new(&scope, &schema);
+        .map(|schema_data| {
+            let sschema = scope
+                .compile_and_return(schema_data.clone(), true)
+                .ok()
+                .unwrap();
             sschema.validate(value).is_valid()
         }).unwrap_or(true)
 }

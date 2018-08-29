@@ -1,20 +1,9 @@
-// Copyright 2017 PingCAP, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 extern crate grpcio;
 extern crate rami;
 extern crate rmp_serde as rmps;
 extern crate serde;
+#[macro_use]
+extern crate serde_json;
 
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -51,5 +40,31 @@ fn main() {
         end.subsec_nanos(),
         end.subsec_nanos() as f64 / 1000000.0
     );
-    println!("Received: {:?}", reply.get_results());
+    for res in reply.get_results() {
+        let device = res.get_id().get_id();
+        let device_name = res.get_display_name();
+        let config = res.get_config();
+        println!("{} => {}", device, device_name);
+        for conf in config.get_config() {
+            let value: serde_json::Value = rmps::from_slice(&conf.get_value()[..]).unwrap();
+            println!("\t{} => {}", conf.get_key(), value);
+        }
+    }
+
+    let start = Instant::now();
+    let mut req = DispatchRequest::new();
+    let mut id = DeviceID::new();
+    id.set_id(0);
+    req.set_device(id);
+    req.set_command("getman".to_string());
+    req.set_args(rmps::to_vec(&json!({"value": 10})).unwrap());
+    let reply = client.dispatch(&req).expect("rpc");
+    let end = start.elapsed();
+    println!(
+        "Elapsed time: {}ns({}ms)",
+        end.subsec_nanos(),
+        end.subsec_nanos() as f64 / 1000000.0
+    );
+    let value: serde_json::Value = rmps::from_slice(&reply.get_rets()[..]).unwrap();
+    println!("Received: {:?}", value);
 }
