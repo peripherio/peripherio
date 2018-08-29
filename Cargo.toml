@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["coord.e <me@coord-e.com>"]
 build = "build.rs"
 
+[[bin]]
+name = "codegen"
+path = "src/codegen.rs"
+
 [[example]]
 name = "client"
 path = "examples/client/client.rs"
