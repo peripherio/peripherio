@@ -1,14 +1,13 @@
-use error::{InvalidJSONNumberError, InvalidNumberError};
-use device::driver::Requirement;
 use config::Config;
+use error::{InvalidJSONNumberError, InvalidNumberError, TypeNotFoundError};
 
-use linked_hash_map::LinkedHashMap;
 use failure::Error;
+use linked_hash_map::LinkedHashMap;
 use serde_json::value::{Number, Value};
 
+use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::{fmt, mem, ptr, slice};
-use std::collections::HashMap;
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);
@@ -85,17 +84,32 @@ pub unsafe fn cast_from_ptr(type_str: &str, ptr: *const u8) -> Result<Value, Err
     })
 }
 
-pub fn value_to_c_struct(requires: &LinkedHashMap<String, Requirement>, value: &HashMap<String, Value>) -> Result<(*mut u8, usize), Error> {
-    let entire_size: usize = requires
+pub fn value_to_c_struct(
+    requires: &LinkedHashMap<String, Value>,
+    value: &HashMap<String, Value>,
+) -> Result<(*mut u8, usize), Error> {
+    let types = requires
         .iter()
-        .fold(0, |sum, (_, v)| sum + size_of_type(v.type_str()));
+        .map(|(k, v)| {
+            Ok((
+                k,
+                v.get("type")
+                    .and_then(|v| v.as_str())
+                    .ok_or({
+                        Error::from(TypeNotFoundError {
+                            field: k.to_string(),
+                        })
+                    })?.to_string(),
+            ))
+        }).collect::<Result<HashMap<&String, String>, Error>>()?;
+    let entire_size: usize = types.iter().fold(0, |sum, (_, v)| sum + size_of_type(v));
     let buf = unsafe { alloc(entire_size) };
     let mut filled_size: usize = 0;
-    for (k, v) in requires {
-        let size = size_of_type(v.type_str());
+    for (k, v) in types {
+        let size = size_of_type(&v);
         if let Some(val) = value.get(k) {
             unsafe {
-                let ptr = cast_to_ptr(v.type_str(), val)?;
+                let ptr = cast_to_ptr(&v, val)?;
                 ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
             }
             filled_size += size;
@@ -107,19 +121,24 @@ pub fn value_to_c_struct(requires: &LinkedHashMap<String, Requirement>, value: &
     Ok((buf, entire_size))
 }
 
-pub fn c_struct_to_value(requires: &LinkedHashMap<String, Requirement>, value: *const u8) -> Result<HashMap<String, Value>, Error> {
+pub fn c_struct_to_value(
+    requires: &LinkedHashMap<String, Value>,
+    value: *const u8,
+) -> Result<HashMap<String, Value>, Error> {
     let mut newconf = Config::new();
     let mut retrieved_size: usize = 0;
     for (k, v) in requires {
-        let size = size_of_type(v.type_str());
+        let type_str =
+            v.get("type")
+                .and_then(|v| v.as_str())
+                .ok_or(Error::from(TypeNotFoundError {
+                    field: k.to_string(),
+                }))?;
+        let size = size_of_type(type_str);
         let val = unsafe {
             let buf = alloc(size);
-            ptr::copy_nonoverlapping(
-                value.offset(retrieved_size as isize),
-                buf,
-                size,
-            );
-            let val = cast_from_ptr(v.type_str(), buf)?.clone();
+            ptr::copy_nonoverlapping(value.offset(retrieved_size as isize), buf, size);
+            let val = cast_from_ptr(type_str, buf)?.clone();
             free(buf, size);
             val
         };

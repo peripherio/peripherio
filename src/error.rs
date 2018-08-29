@@ -24,6 +24,11 @@ pub struct InvalidJSONNumberError {
 }
 
 #[derive(Fail, Debug)]
+#[fail(display = "Cannot find type from schema \"{}\"", field)]
+pub struct TypeNotFoundError {
+    pub field: String,
+}
+#[derive(Fail, Debug)]
 #[fail(display = "Cannot resolve name {}", name)]
 pub struct CannotResolveError {
     pub name: String,

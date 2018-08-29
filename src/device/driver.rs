@@ -115,12 +115,11 @@ impl DriverData {
     }
 
     pub fn validate_config_value(&self, key: &str, value: &ConfigValue) -> bool {
-        let scope = Scope::new();
-        self.requires
+        let mut scope = Scope::new();
+        self.schemas
             .get(key)
-            .and_then(|req| req.schema().as_ref())
-            .map(|schema| {
-                let sschema = ScopedSchema::new(&scope, &schema);
+            .map(|schema_data| {
+                let sschema = scope.compile_and_return(schema_data.clone(), true).ok().unwrap();
                 sschema.validate(value).is_valid()
             }).unwrap_or(true)
     }
@@ -130,7 +129,7 @@ impl DriverData {
     }
 
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
-        let (buf, entire_size) = util::value_to_c_struct(&self.requires, conf)?;
+        let (buf, entire_size) = util::value_to_c_struct(&self.schemas, conf)?;
         let detect =
             unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect")? };
         let mut ret_size: usize = 0;
@@ -139,9 +138,8 @@ impl DriverData {
         let ary_of_conf = unsafe { slice::from_raw_parts(res, ret_size) };
         ary_of_conf
             .iter()
-            .map(|ret_conf| {
-                util::c_struct_to_value(&self.requires, *ret_conf)
-            }).collect()
+            .map(|ret_conf| util::c_struct_to_value(&self.schemas, *ret_conf))
+            .collect()
     }
 
     pub fn path(&self) -> &PathBuf {
