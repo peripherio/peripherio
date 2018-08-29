@@ -101,6 +101,10 @@ impl DeviceManager {
         self.names.get(dev)
     }
 
+    pub fn get_device_driver(&self, dev: &Device) -> Option<&Driver> {
+        self.devices.get(dev).map(|data| &data.0)
+    }
+
     pub fn get_device_config(&self, dev: &Device) -> Option<&Config> {
         self.devices.get(dev).map(|data| &data.1)
     }
