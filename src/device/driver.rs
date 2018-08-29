@@ -166,8 +166,8 @@ impl DriverData {
             .iter()
             .find(|v| {
                 v.required_symbols()
-                    .collect::<Vec<_>>()
-                    .contains(&&command.to_string())
+                    .find(|sym| sym == &command)
+                    .is_some()
             }).ok_or(
                 Error::from(error::UnknownCommandError {
                     name: command.to_string(),
