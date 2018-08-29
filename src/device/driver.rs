@@ -182,25 +182,7 @@ impl DriverData {
         ary_of_conf
             .iter()
             .map(|ret_conf| {
-                let mut newconf = conf.clone();
-                let mut retrieved_size: usize = 0;
-                for (k, v) in &self.requires {
-                    let size = util::size_of_type(v.type_str());
-                    let val = unsafe {
-                        let buf = util::alloc(size);
-                        ptr::copy_nonoverlapping(
-                            ret_conf.offset(retrieved_size as isize),
-                            buf,
-                            size,
-                        );
-                        let val = util::cast_from_ptr(v.type_str(), buf)?.clone();
-                        util::free(buf, size);
-                        val
-                    };
-                    retrieved_size += size;
-                    newconf.insert(k.to_string(), val);
-                }
-                Ok(newconf)
+                util::c_struct_to_value(&self.requires, *ret_conf)
             }).collect()
     }
 

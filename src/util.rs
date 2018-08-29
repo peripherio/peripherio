@@ -1,5 +1,6 @@
 use error::{InvalidJSONNumberError, InvalidNumberError};
 use device::driver::Requirement;
+use config::Config;
 
 use linked_hash_map::LinkedHashMap;
 use failure::Error;
@@ -104,4 +105,26 @@ pub fn value_to_c_struct(requires: &LinkedHashMap<String, Requirement>, value: &
         }
     }
     Ok((buf, entire_size))
+}
+
+pub fn c_struct_to_value(requires: &LinkedHashMap<String, Requirement>, value: *const u8) -> Result<HashMap<String, Value>, Error> {
+    let mut newconf = Config::new();
+    let mut retrieved_size: usize = 0;
+    for (k, v) in requires {
+        let size = size_of_type(v.type_str());
+        let val = unsafe {
+            let buf = alloc(size);
+            ptr::copy_nonoverlapping(
+                value.offset(retrieved_size as isize),
+                buf,
+                size,
+            );
+            let val = cast_from_ptr(v.type_str(), buf)?.clone();
+            free(buf, size);
+            val
+        };
+        retrieved_size += size;
+        newconf.insert(k.to_string(), val);
+    }
+    Ok(newconf)
 }
