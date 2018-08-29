@@ -132,16 +132,26 @@ impl DriverData {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
     }
 
-    pub fn merged_schemas(&self) -> HashMap<String, serde_json::Value> {
-        let mut gen = GLOBAL_SCHEMA.clone();
-        for (key, schema) in &self.schemas {
-            if let Some(ref mut v) = gen.get_mut(key) {
-                util::merge_value(v, &schema);
-                continue;
-            }
-            gen.insert(key.clone(), schema.clone());
+    pub fn merged_schemas(&self) -> Result<LinkedHashMap<String, serde_json::Value>, Error> {
+        let mut gen = LinkedHashMap::new();
+        for key in &self.requires {
+            gen.insert(
+                key.clone(),
+                match (self.schemas.get(key), GLOBAL_SCHEMA.get(key)) {
+                    (Some(schema), Some(v)) => {
+                        let mut new_val = v.clone();
+                        util::merge_value(&mut new_val, &schema);
+                        new_val
+                    }
+                    (Some(schema), None) => schema.clone(),
+                    (None, Some(v)) => v.clone(),
+                    (None, None) => {
+                        return Err(error::UnknownConfigError { name: key.clone() }.into())
+                    }
+                },
+            );
         }
-        gen
+        Ok(gen)
     }
 
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
