@@ -11,6 +11,10 @@ use std::collections::HashMap;
 pub struct Device(usize);
 
 impl Device {
+    pub fn with_id(id: usize) -> Self {
+        Device(id)
+    }
+
     pub fn id(&self) -> usize {
         self.0
     }
