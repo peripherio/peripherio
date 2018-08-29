@@ -199,6 +199,10 @@ impl DriverData {
             .collect()
     }
 
+    pub fn schemas(&self) -> &LinkedHashMap<String, serde_json::Value> {
+        &self.merged_schemas
+    }
+
     pub fn path(&self) -> &PathBuf {
         &self.path
     }
