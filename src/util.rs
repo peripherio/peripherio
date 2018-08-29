@@ -42,8 +42,8 @@ pub unsafe fn cast_to_ptr(type_str: &str, v: &Value) -> Result<*const u8, Error>
                 }
                 "integer" => {
                     let via: i64 = n
-                        .as_i64()
-                        .ok_or(InvalidJSONNumberError { value: n.clone() })?;
+                        .as_f64()
+                        .ok_or(InvalidJSONNumberError { value: n.clone() })? as i64;
                     mem::transmute::<&i64, *const u8>(&via) // i64
                 }
                 _ => unimplemented!(),
