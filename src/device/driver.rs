@@ -37,7 +37,7 @@ pub struct DriverData {
     category: Vec<Category>,
     requires: Vec<String>,
     detects: Vec<String>,
-    schemas: LinkedHashMap<String, serde_json::Value>,
+    merged_schemas: LinkedHashMap<String, serde_json::Value>,
     driver: Library,
 }
 
@@ -79,6 +79,28 @@ impl DriverData {
             .iter()
             .map(|c| c.parse())
             .collect::<Result<Vec<_>, _>>()?;
+
+        let requires = metadata.requires.unwrap_or_default();
+        let schemas = metadata.schemas.unwrap_or_default();
+        let mut merged_schemas = LinkedHashMap::new();
+        for key in &requires {
+            merged_schemas.insert(
+                key.clone(),
+                match (schemas.get(key), GLOBAL_SCHEMA.get(key)) {
+                    (Some(schema), Some(v)) => {
+                        let mut new_val = v.clone();
+                        util::merge_value(&mut new_val, &schema);
+                        new_val
+                    }
+                    (Some(schema), None) => schema.clone(),
+                    (None, Some(v)) => v.clone(),
+                    (None, None) => {
+                        return Err(error::UnknownConfigError { name: key.clone() }.into())
+                    }
+                },
+            );
+        }
+
         let inst = DriverData {
             path: path.as_ref().to_path_buf(),
             driver: Library::new(path.as_ref().join(driver_file))?,
@@ -86,9 +108,9 @@ impl DriverData {
             author: metadata.author,
             vendor: metadata.vendor,
             version: metadata.version,
-            requires: metadata.requires.unwrap_or_default(),
             detects: metadata.detects.unwrap_or_default(),
-            schemas: metadata.schemas.unwrap_or_default(),
+            requires,
+            merged_schemas,
             category,
         };
         if !inst.validate_symbols() {
@@ -117,8 +139,7 @@ impl DriverData {
 
     pub fn validate_config_value(&self, key: &str, value: &ConfigValue) -> bool {
         let mut scope = Scope::new();
-        self.merged_schemas()
-            .unwrap() // FIXME
+        self.merged_schemas
             .get(key)
             .map(|schema_data| {
                 let sschema = scope
@@ -133,30 +154,8 @@ impl DriverData {
         config.iter().all(|(k, v)| self.validate_config_value(k, v))
     }
 
-    pub fn merged_schemas(&self) -> Result<LinkedHashMap<String, serde_json::Value>, Error> {
-        let mut gen = LinkedHashMap::new();
-        for key in &self.requires {
-            gen.insert(
-                key.clone(),
-                match (self.schemas.get(key), GLOBAL_SCHEMA.get(key)) {
-                    (Some(schema), Some(v)) => {
-                        let mut new_val = v.clone();
-                        util::merge_value(&mut new_val, &schema);
-                        new_val
-                    }
-                    (Some(schema), None) => schema.clone(),
-                    (None, Some(v)) => v.clone(),
-                    (None, None) => {
-                        return Err(error::UnknownConfigError { name: key.clone() }.into())
-                    }
-                },
-            );
-        }
-        Ok(gen)
-    }
-
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
-        let (buf, entire_size) = util::value_to_c_struct(&self.merged_schemas()?, conf)?;
+        let (buf, entire_size) = util::value_to_c_struct(&self.merged_schemas, conf)?;
         let detect =
             unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect")? };
         let mut ret_size: usize = 0;
@@ -165,7 +164,7 @@ impl DriverData {
         let ary_of_conf = unsafe { slice::from_raw_parts(res, ret_size) };
         ary_of_conf
             .iter()
-            .map(|ret_conf| util::c_struct_to_value(&self.merged_schemas()?, *ret_conf))
+            .map(|ret_conf| util::c_struct_to_value(&self.merged_schemas, *ret_conf))
             .collect()
     }
 
