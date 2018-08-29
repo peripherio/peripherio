@@ -1,10 +1,13 @@
 use error::{InvalidJSONNumberError, InvalidNumberError};
+use device::driver::Requirement;
 
+use linked_hash_map::LinkedHashMap;
 use failure::Error;
 use serde_json::value::{Number, Value};
 
 use std::ffi::{CStr, CString};
-use std::{mem, slice};
+use std::{fmt, mem, ptr, slice};
+use std::collections::HashMap;
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);
@@ -79,4 +82,26 @@ pub unsafe fn cast_from_ptr(type_str: &str, ptr: *const u8) -> Result<Value, Err
         /*"object" => 8, Write someday // ptr */
         _ => unimplemented!(),
     })
+}
+
+pub fn value_to_c_struct(requires: &LinkedHashMap<String, Requirement>, value: &HashMap<String, Value>) -> Result<(*mut u8, usize), Error> {
+    let entire_size: usize = requires
+        .iter()
+        .fold(0, |sum, (_, v)| sum + size_of_type(v.type_str()));
+    let buf = unsafe { alloc(entire_size) };
+    let mut filled_size: usize = 0;
+    for (k, v) in requires {
+        let size = size_of_type(v.type_str());
+        if let Some(val) = value.get(k) {
+            unsafe {
+                let ptr = cast_to_ptr(v.type_str(), val)?;
+                ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
+            }
+            filled_size += size;
+        } else {
+            unsafe { ptr::write_bytes(buf.offset(filled_size as isize), 0, size) };
+            filled_size += size;
+        }
+    }
+    Ok((buf, entire_size))
 }

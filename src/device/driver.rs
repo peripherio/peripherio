@@ -172,25 +172,7 @@ impl DriverData {
     }
 
     pub fn detect(&self, conf: &Config) -> Result<Vec<Config>, Error> {
-        let entire_size: usize = self
-            .requires
-            .iter()
-            .fold(0, |sum, (_, v)| sum + util::size_of_type(v.type_str()));
-        let buf = unsafe { util::alloc(entire_size) };
-        let mut filled_size: usize = 0;
-        for (k, v) in &self.requires {
-            let size = util::size_of_type(v.type_str());
-            if let Some(val) = conf.get(k) {
-                unsafe {
-                    let ptr = util::cast_to_ptr(v.type_str(), val)?;
-                    ptr::copy_nonoverlapping(ptr, buf.offset(filled_size as isize), size);
-                }
-                filled_size += size;
-            } else {
-                unsafe { ptr::write_bytes(buf.offset(filled_size as isize), 0, size) };
-                filled_size += size;
-            }
-        }
+        let (buf, entire_size) = util::value_to_c_struct(&self.requires, conf)?;
         let detect =
             unsafe { self.get::<fn(*const u8, *mut usize) -> *const *const u8>("detect")? };
         let mut ret_size: usize = 0;
