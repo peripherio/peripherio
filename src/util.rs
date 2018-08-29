@@ -101,7 +101,7 @@ pub fn value_to_c_struct(
                         })
                     })?.to_string(),
             ))
-        }).collect::<Result<HashMap<&String, String>, Error>>()?;
+        }).collect::<Result<LinkedHashMap<&String, String>, Error>>()?;
     let entire_size: usize = types.iter().fold(0, |sum, (_, v)| sum + size_of_type(v));
     let buf = unsafe { alloc(entire_size) };
     let mut filled_size: usize = 0;
