@@ -3,7 +3,7 @@ version: "0.1"
 author: "coord.e <me@coord-e.com>"
 category: ["accelerometer", "gyro", "thermometer"]
 driver: "driver.so"
-requires: ["if.type", "if.speed", "if.i2c.busnum", "if.i2c.address"]
+requires: ["if.type", "if.i2c.speed", "if.i2c.busnum", "if.i2c.address"]
 detects: ["if.i2c.speed", "if.i2c.busnum", "if.i2c.address"]
 schemas:
   if.type:
