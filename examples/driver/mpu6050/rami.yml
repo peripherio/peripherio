@@ -1,0 +1,18 @@
+name: "mpu6050"
+version: "0.1"
+author: "coord.e <me@coord-e.com>"
+category: ["accelerometer", "gyro", "thermometer"]
+driver: "driver.so"
+requires: ["if.type", "if.speed", "if.i2c.busnum", "if.i2c.address"]
+detects: ["if.speed", "if.i2c.busnum", "if.i2c.address"]
+schemas:
+  if.type:
+    type: "string"
+    enum: ["i2c"]
+  if.speed:
+    type: "integer"
+    maximum: 400000
+  if.i2c.busnum:
+    type: "integer"
+  if.i2c.address:
+    type: "integer"
