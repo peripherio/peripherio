@@ -1,0 +1,9 @@
+name: "thermometer"
+version: "0.1"
+author: "coord.e <me@coord-e.com>"
+
+signatures:
+  get_temperature:
+    returns:
+      value:
+        type: number

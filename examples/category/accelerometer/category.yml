@@ -1,0 +1,13 @@
+name: "accelerometer"
+version: "0.1"
+author: "coord.e <me@coord-e.com>"
+
+signatures:
+  get_accel:
+    returns:
+      x:
+        type: number
+      y:
+        type: number
+      z:
+        type: number
