@@ -209,7 +209,6 @@ Config** detect(Config* conf, size_t* size) {
       new_config->if_i2c_address = addr;
 
       results[results_count++] = new_config;
-      results_count++;
     }
     close(fd);
   }
