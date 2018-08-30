@@ -42,19 +42,23 @@ fn merge_map(
         }).collect()
 }
 
-fn main() {
-    let drv = DriverData::new(".").unwrap();
-
-    let mut writer = BufWriter::new(File::create("rami.gen.h").unwrap());
-
-    let fields = drv.schemas().iter().fold(String::new(), |acc, (k, v)| {
+fn field_strs(fields: &LinkedHashMap<String, serde_json::Value>) -> String {
+    fields.iter().fold(String::new(), |acc, (k, v)| {
         format!(
             "{}  {} {};\n",
             acc,
             ctype(v["type"].as_str().unwrap()),
             k.replace(".", "_")
         )
-    });
+    })
+}
+
+fn main() {
+    let drv = DriverData::new(".").unwrap();
+
+    let mut writer = BufWriter::new(File::create("rami.gen.h").unwrap());
+
+    let fields = field_strs(drv.schemas());
     write!(
         &mut writer,
         "typedef struct Config_ {{\n{}}} __attribute__((__packed__)) Config;\n",
@@ -88,36 +92,14 @@ fn main() {
     }
 
     for (name, sign) in merged_signs {
-        let arg_fields =
-            sign.args
-                .clone()
-                .unwrap_or_default()
-                .iter()
-                .fold(String::new(), |acc, (key, val)| {
-                    format!(
-                        "{}  {} {};\n",
-                        acc,
-                        ctype(val["type"].as_str().unwrap()),
-                        key.replace(".", "_")
-                    )
-                });
+        let arg_fields = field_strs(&sign.args.clone().unwrap_or_default());
         write!(
             &mut writer,
             "typedef struct {0}_args_ {{\n{1}}} __attribute__((__packed__)) {0}_args;\n",
             name, arg_fields
         );
 
-        let return_fields = sign.returns.clone().unwrap_or_default().iter().fold(
-            String::new(),
-            |acc, (key, val)| {
-                format!(
-                    "{}  {} {};\n",
-                    acc,
-                    ctype(val["type"].as_str().unwrap()),
-                    key.replace(".", "_")
-                )
-            },
-        );
+        let return_fields = field_strs(&sign.returns.clone().unwrap_or_default());
         write!(
             &mut writer,
             "typedef struct {0}_returns_ {{\n{1}}} __attribute__((__packed__)) {0}_returns;\n",
