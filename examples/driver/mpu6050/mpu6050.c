@@ -15,6 +15,11 @@
 #define ACCEL_RANGE_8G 0x10
 #define ACCEL_RANGE_16G 0x18
 
+#define GYRO_RANGE_250DEG 0x00
+#define GYRO_RANGE_500DEG 0x08
+#define GYRO_RANGE_1000DEG 0x10
+#define GYRO_RANGE_2000DEG 0x18
+
 static const float GRAVITY_MS2 = 9.80665;
 static const float ACCEL_SCALE_MODIFIER_2G = 16384.0;
 static const float ACCEL_SCALE_MODIFIER_4G = 8192.0;
@@ -25,11 +30,6 @@ static const float GYRO_SCALE_MODIFIER_250DEG = 131.0;
 static const float GYRO_SCALE_MODIFIER_500DEG = 65.5;
 static const float GYRO_SCALE_MODIFIER_1000DEG = 32.8;
 static const float GYRO_SCALE_MODIFIER_2000DEG = 16.4;
-
-static const uint8_t GYRO_RANGE_250DEG = 0x00;
-static const uint8_t GYRO_RANGE_500DEG = 0x08;
-static const uint8_t GYRO_RANGE_1000DEG = 0x10;
-static const uint8_t GYRO_RANGE_2000DEG = 0x18;
 
 static const uint8_t PWR_MGMT_1 = 0x6B;
 static const uint8_t PWR_MGMT_2 = 0x6C;
@@ -106,8 +106,50 @@ int accel_range_to_mod(uint8_t raw_data) {
   }
 }
 
+int gyro_range_to_mod(uint8_t raw_data) {
+  switch(raw_data) {
+    case GYRO_RANGE_250DEG:
+      return 2;
+    case GYRO_RANGE_500DEG:
+      return 4;
+    case GYRO_RANGE_1000DEG:
+      return 8;
+    case GYRO_RANGE_2000DEG:
+      return 16;
+    default:
+      return -1;
+  }
+}
+
 get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
-  /* Your Implementation! */
+  int fd = use_config(conf);
+  if (fd < 0) {
+    return NULL;
+  }
+
+  uint16_t x, y, z;
+  i2c_read_word(fd, GYRO_XOUT0, &x);
+  i2c_read_word(fd, GYRO_YOUT0, &y);
+  i2c_read_word(fd, GYRO_ZOUT0, &z);
+
+  uint8_t gyro_range;
+  if(i2c_read(fd, GYRO_CONFIG, &gyro_range) != 0) {
+    return NULL;
+  }
+
+  int mod = gyro_range_to_mod(gyro_range);
+  if(mod < 0) {
+    return NULL;
+  }
+  const double gyro_scale_modifier = 262.0 / mod;
+
+  get_gyro_returns* res = malloc(sizeof(get_gyro_returns));
+  res->x = x / gyro_scale_modifier;
+  res->y = y / gyro_scale_modifier;
+  res->z = z / gyro_scale_modifier;
+
+  close(fd);
+  return res;
 }
 
 get_accel_returns* get_accel(get_accel_args* args, Config* conf) {
