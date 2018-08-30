@@ -46,6 +46,37 @@ static const uint8_t GYRO_ZOUT0 = 0x47;
 static const uint8_t ACCEL_CONFIG = 0x1C;
 static const uint8_t GYRO_CONFIG = 0x1B;
 
+int i2c_read(int fd, uint8_t reg, uint8_t* dat) {
+  if ((write(fd, &reg, 1)) != 1) {
+    return -1;
+  }
+
+  if (read(fd, dat, 1) != 1) {
+    return -1;
+  }
+  return 0;
+}
+
+int i2c_read_word(int fd, uint8_t reg, uint16_t* dat) {
+  uint8_t high;
+  if (i2c_read(fd, reg, &high) != 0) {
+    return -1;
+  }
+
+  uint8_t low;
+  if (i2c_read(fd, reg+1, &low) != 0) {
+    return -1;
+  }
+
+  uint16_t value = (high << 8) + low;
+
+  if (value >= 0x8000) {
+    value = -((0xFFFF - value) + 1);
+  }
+
+  *dat = value;
+}
+
 get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
   /* Your Implementation! */
 }
@@ -78,12 +109,8 @@ Config** detect(Config* conf, size_t* size) {
       }
 
       /* Read who_am_i */
-      uint8_t reg = 0x75;
-      if ((write(fd, &reg, 1)) != 1) {
-        return NULL;
-      }
       uint8_t dat;
-      if (read(fd, &dat, 1) != 1) {
+      if (i2c_read(fd, 0x75, &dat) != 0) {
         return NULL;
       }
       if(dat != 0b01101000) {
