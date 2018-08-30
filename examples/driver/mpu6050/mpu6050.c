@@ -218,7 +218,7 @@ Config** detect(Config* conf, size_t* size) {
   Config** res = malloc(sizeof(Config*)*results_count);
   for(size_t i = 0; i < results_count; i++) {
     res[i] = malloc(sizeof(Config));
-    memcpy(res[i], results[i], sizeof(Config));
+    *res[i] = *results[i];
   }
   return res;
 }
