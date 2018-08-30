@@ -8,7 +8,7 @@ import contextlib
 
 
 @contextlib.contextmanager
-def connect(uri):
+def connect(uri='localhost:50051'):
     with grpc.insecure_channel(uri) as channel:
         stub = main_pb2_grpc.RamiStub(channel)
         conn = Connection(stub)
@@ -36,7 +36,7 @@ class Device(object):
         self.conn = conn
 
     def __getattr__(self, name):
-        def __internal(args):
+        def __internal(args={}):
             ret = self.conn.stub.Dispatch(main_pb2.DispatchRequest(device=self.device_id, command=name, args=msgpack.packb(args)))
             return msgpack.unpackb(ret.rets)
         return __internal
