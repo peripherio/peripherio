@@ -80,6 +80,7 @@ fn main() {
             println!("  {} {};", ctype(val["type"].as_str().unwrap()), key.replace(".", "_"));
         }
         println!("}} __attribute__((__packed__)) {}_returns;", name);
+        println!("{0}_returns* {0}({0}* args, Config* conf);", name)
     }
 }
 
