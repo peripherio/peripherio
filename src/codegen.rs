@@ -57,6 +57,8 @@ fn main() {
     let drv = DriverData::new(".").unwrap();
 
     let mut writer = BufWriter::new(File::create("rami.gen.h").unwrap());
+    let mut impl_writer = BufWriter::new(File::create(format!("{}.c", drv.name())).unwrap());
+    write!(&mut impl_writer, "#include \"rami.gen.h\"\n\n");
 
     let fields = field_strs(drv.schemas());
     write!(
@@ -109,6 +111,11 @@ fn main() {
         write!(
             &mut writer,
             "{0}_returns* {0}({0}_args* args, Config* conf);\n",
+            name
+        );
+        write!(
+            &mut impl_writer,
+            "{0}_returns* {0}({0}_args* args, Config* conf) {{\n  /* Your Implementation! */\n}}\n\n",
             name
         );
     }
