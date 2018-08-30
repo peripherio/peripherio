@@ -194,8 +194,7 @@ Config** detect(Config* conf, size_t* size) {
       /* Read who_am_i */
       uint8_t dat;
       if (i2c_read(fd, 0x75, &dat) != 0) {
-        close(fd);
-        return NULL;
+        continue;
       }
       if(dat != 0b01101000) {
         continue;
