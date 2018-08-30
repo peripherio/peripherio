@@ -78,6 +78,19 @@ int i2c_read_word(int fd, uint8_t reg, uint16_t* dat) {
   *dat = value;
 }
 
+int use_config(Config* conf) {
+  char dev[15];
+  sprintf(dev, "/dev/i2c-%d", conf->if_i2c_busnum);
+  int fd = open(dev, O_RDWR);
+  if (fd < 0) {
+    return -1;
+  }
+  if (ioctl(fd, I2C_SLAVE, conf->if_i2c_address) < 0) {
+    return -1;
+  }
+  return fd;
+}
+
 get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
   /* Your Implementation! */
 }
@@ -87,13 +100,8 @@ get_accel_returns* get_accel(get_accel_args* args, Config* conf) {
 }
 
 get_temperature_returns* get_temperature(get_temperature_args* args, Config* conf) {
-  char dev[15];
-  sprintf(dev, "/dev/i2c-%d", conf->if_i2c_busnum);
-  int fd = open(dev, O_RDWR);
+  int fd = use_config(conf);
   if (fd < 0) {
-    return NULL;
-  }
-  if (ioctl(fd, I2C_SLAVE, conf->if_i2c_address) < 0) {
     return NULL;
   }
 
