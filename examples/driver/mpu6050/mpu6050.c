@@ -120,6 +120,7 @@ Config** detect(Config* conf, size_t* size) {
   for (int i = 0; i < globbuf.gl_pathc; i++) {
     int fd = open(globbuf.gl_pathv[i], O_RDWR);
     if (fd < 0) {
+      close(fd);
       return NULL;
     }
     for (uint8_t addr = 0x03; addr < 0x78; addr++) {
@@ -130,6 +131,7 @@ Config** detect(Config* conf, size_t* size) {
       /* Read who_am_i */
       uint8_t dat;
       if (i2c_read(fd, 0x75, &dat) != 0) {
+        close(fd);
         return NULL;
       }
       if(dat != 0b01101000) {
@@ -147,6 +149,7 @@ Config** detect(Config* conf, size_t* size) {
       results[results_count++] = new_config;
       results_count++;
     }
+    close(fd);
   }
   globfree(&globbuf);
 
