@@ -11,7 +11,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct Signature {
     pub args: Option<LinkedHashMap<String, Value>>,
     pub returns: Option<LinkedHashMap<String, Value>>,
