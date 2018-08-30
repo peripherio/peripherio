@@ -1,12 +1,12 @@
+extern crate linked_hash_map;
 extern crate rami;
 extern crate serde_json;
-extern crate linked_hash_map;
 
 use linked_hash_map::LinkedHashMap;
 
+use rami::category::Signature;
 use rami::driver::driver::DriverData;
 use rami::util;
-use rami::category::Signature;
 
 use std::collections::HashMap;
 use std::fs::File;
@@ -17,11 +17,14 @@ fn ctype(type_str: &str) -> String {
         "number" => "double",
         "integer" => "long",
         "string" => "const char*",
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }.to_string()
 }
 
-fn merge_map(map1: &LinkedHashMap<String, serde_json::Value>, map2: &LinkedHashMap<String, serde_json::Value>) -> LinkedHashMap<String, serde_json::Value>{
+fn merge_map(
+    map1: &LinkedHashMap<String, serde_json::Value>,
+    map2: &LinkedHashMap<String, serde_json::Value>,
+) -> LinkedHashMap<String, serde_json::Value> {
     map1.keys()
         .map(|key| {
             (
