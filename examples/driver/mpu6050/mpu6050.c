@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <glob.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -86,7 +87,25 @@ get_accel_returns* get_accel(get_accel_args* args, Config* conf) {
 }
 
 get_temperature_returns* get_temperature(get_temperature_args* args, Config* conf) {
-  /* Your Implementation! */
+  char dev[15];
+  sprintf(dev, "/dev/i2c-%d", conf->if_i2c_busnum);
+  int fd = open(dev, O_RDWR);
+  if (fd < 0) {
+    return NULL;
+  }
+  if (ioctl(fd, I2C_SLAVE, conf->if_i2c_address) < 0) {
+    return NULL;
+  }
+
+  uint16_t raw_temp;
+  i2c_read_word(fd, TEMP_OUT0, &raw_temp);
+  const double actual_temp = (raw_temp / 340.0) + 36.53;
+
+  get_temperature_returns* res = malloc(sizeof(get_temperature_returns));
+  res->value = actual_temp;
+
+  close(fd);
+  return res;
 }
 
 void init() {
