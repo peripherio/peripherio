@@ -9,6 +9,43 @@
 
 #include "rami.gen.h"
 
+static const float GRAVITY_MS2 = 9.80665;
+static const float ACCEL_SCALE_MODIFIER_2G = 16384.0;
+static const float ACCEL_SCALE_MODIFIER_4G = 8192.0;
+static const float ACCEL_SCALE_MODIFIER_8G = 4096.0;
+static const float ACCEL_SCALE_MODIFIER_16G = 2048.0;
+
+static const float GYRO_SCALE_MODIFIER_250DEG = 131.0;
+static const float GYRO_SCALE_MODIFIER_500DEG = 65.5;
+static const float GYRO_SCALE_MODIFIER_1000DEG = 32.8;
+static const float GYRO_SCALE_MODIFIER_2000DEG = 16.4;
+
+static const uint8_t ACCEL_RANGE_2G = 0x00;
+static const uint8_t ACCEL_RANGE_4G = 0x08;
+static const uint8_t ACCEL_RANGE_8G = 0x10;
+static const uint8_t ACCEL_RANGE_16G = 0x18;
+
+static const uint8_t GYRO_RANGE_250DEG = 0x00;
+static const uint8_t GYRO_RANGE_500DEG = 0x08;
+static const uint8_t GYRO_RANGE_1000DEG = 0x10;
+static const uint8_t GYRO_RANGE_2000DEG = 0x18;
+
+static const uint8_t PWR_MGMT_1 = 0x6B;
+static const uint8_t PWR_MGMT_2 = 0x6C;
+
+static const uint8_t ACCEL_XOUT0 = 0x3B;
+static const uint8_t ACCEL_YOUT0 = 0x3D;
+static const uint8_t ACCEL_ZOUT0 = 0x3F;
+
+static const uint8_t TEMP_OUT0 = 0x41;
+
+static const uint8_t GYRO_XOUT0 = 0x43;
+static const uint8_t GYRO_YOUT0 = 0x45;
+static const uint8_t GYRO_ZOUT0 = 0x47;
+
+static const uint8_t ACCEL_CONFIG = 0x1C;
+static const uint8_t GYRO_CONFIG = 0x1B;
+
 get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
   /* Your Implementation! */
 }
