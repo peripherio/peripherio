@@ -60,11 +60,13 @@ fn main() {
     let mut impl_writer = BufWriter::new(File::create(format!("{}.c", drv.name())).unwrap());
     write!(&mut impl_writer, "#include \"rami.gen.h\"\n\n");
 
+    write!(&mut writer, "void init();\n");
     write!(
         &mut impl_writer,
         "void init() {{\n  /* Your Implementation! */\n}}\n\n"
     );
 
+    write!(&mut writer, "Config** detect(Config*, size_t*);\n");
     write!(
         &mut impl_writer,
         "Config** detect(Config* conf, size_t* size) {{\n  /* Your Implementation! */\n}}\n\n"
