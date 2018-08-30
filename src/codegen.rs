@@ -92,14 +92,14 @@ fn main() {
     }
 
     for (name, sign) in merged_signs {
-        let arg_fields = field_strs(&sign.args.clone().unwrap_or_default());
+        let arg_fields = field_strs(&sign.args.unwrap_or_default());
         write!(
             &mut writer,
             "typedef struct {0}_args_ {{\n{1}}} __attribute__((__packed__)) {0}_args;\n",
             name, arg_fields
         );
 
-        let return_fields = field_strs(&sign.returns.clone().unwrap_or_default());
+        let return_fields = field_strs(&sign.returns.unwrap_or_default());
         write!(
             &mut writer,
             "typedef struct {0}_returns_ {{\n{1}}} __attribute__((__packed__)) {0}_returns;\n",
