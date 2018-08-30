@@ -10,26 +10,12 @@
 
 #include "rami.gen.h"
 
-#define ACCEL_RANGE_2G 0x00
-#define ACCEL_RANGE_4G 0x08
-#define ACCEL_RANGE_8G 0x10
-#define ACCEL_RANGE_16G 0x18
-
-#define GYRO_RANGE_250DEG 0x00
-#define GYRO_RANGE_500DEG 0x08
-#define GYRO_RANGE_1000DEG 0x10
-#define GYRO_RANGE_2000DEG 0x18
+#define RANGE_2G 0x00
+#define RANGE_4G 0x08
+#define RANGE_8G 0x10
+#define RANGE_16G 0x18
 
 static const float GRAVITY_MS2 = 9.80665;
-static const float ACCEL_SCALE_MODIFIER_2G = 16384.0;
-static const float ACCEL_SCALE_MODIFIER_4G = 8192.0;
-static const float ACCEL_SCALE_MODIFIER_8G = 4096.0;
-static const float ACCEL_SCALE_MODIFIER_16G = 2048.0;
-
-static const float GYRO_SCALE_MODIFIER_250DEG = 131.0;
-static const float GYRO_SCALE_MODIFIER_500DEG = 65.5;
-static const float GYRO_SCALE_MODIFIER_1000DEG = 32.8;
-static const float GYRO_SCALE_MODIFIER_2000DEG = 16.4;
 
 static const uint8_t PWR_MGMT_1 = 0x6B;
 static const uint8_t PWR_MGMT_2 = 0x6C;
@@ -91,30 +77,15 @@ int use_config(Config* conf) {
   return fd;
 }
 
-int accel_range_to_mod(uint8_t raw_data) {
+int range_to_mod(uint8_t raw_data) {
   switch(raw_data) {
-    case ACCEL_RANGE_2G:
+    case RANGE_2G:
       return 2;
-    case ACCEL_RANGE_4G:
+    case RANGE_4G:
       return 4;
-    case ACCEL_RANGE_8G:
+    case RANGE_8G:
       return 8;
-    case ACCEL_RANGE_16G:
-      return 16;
-    default:
-      return -1;
-  }
-}
-
-int gyro_range_to_mod(uint8_t raw_data) {
-  switch(raw_data) {
-    case GYRO_RANGE_250DEG:
-      return 2;
-    case GYRO_RANGE_500DEG:
-      return 4;
-    case GYRO_RANGE_1000DEG:
-      return 8;
-    case GYRO_RANGE_2000DEG:
+    case RANGE_16G:
       return 16;
     default:
       return -1;
@@ -137,7 +108,7 @@ get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
     return NULL;
   }
 
-  int mod = gyro_range_to_mod(gyro_range);
+  int mod = range_to_mod(gyro_range);
   if(mod < 0) {
     return NULL;
   }
@@ -168,7 +139,7 @@ get_accel_returns* get_accel(get_accel_args* args, Config* conf) {
     return NULL;
   }
 
-  int mod = accel_range_to_mod(accel_range);
+  int mod = range_to_mod(accel_range);
   if(mod < 0) {
     return NULL;
   }
