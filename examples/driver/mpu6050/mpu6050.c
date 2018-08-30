@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <glob.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
@@ -34,17 +35,17 @@ Config** detect(Config* conf, size_t* size) {
     if (fd < 0) {
       return NULL;
     }
-    for (u_int8_t addr = 0x03; addr < 0x78; addr++) {
+    for (uint8_t addr = 0x03; addr < 0x78; addr++) {
       if (ioctl(fd, I2C_SLAVE, addr) < 0) {
         continue;
       }
 
       /* Read who_am_i */
-      u_int8_t reg = 0x75;
+      uint8_t reg = 0x75;
       if ((write(fd, &reg, 1)) != 1) {
         return NULL;
       }
-      u_int8_t dat;
+      uint8_t dat;
       if (read(fd, &dat, 1) != 1) {
         return NULL;
       }
