@@ -3,9 +3,9 @@ syntax = "proto3";
 import "google/protobuf/any.proto";
 
 option java_multiple_files = true;
-option java_package = "com.y-modify.peripherio.proto";
+option java_package = "io.peripher.proto";
 option java_outer_classname = "PeripherioProto";
-option objc_class_prefix = "RMP";
+option objc_class_prefix = "PPI";
 
 package peripherio;
 
