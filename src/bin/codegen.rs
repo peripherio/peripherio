@@ -1,16 +1,19 @@
 extern crate linked_hash_map;
 extern crate peripherio;
 extern crate serde_json;
+extern crate serde_yaml;
+#[macro_use]
+extern crate serde_derive;
 
 use linked_hash_map::LinkedHashMap;
 
-use peripherio::category::Signature;
-use peripherio::driver::driver::DriverData;
+use peripherio::category::{Category, Signature};
+use peripherio::driver::driver::{DriverData, DRIVER_FILE};
 use peripherio::util;
 
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Read, Write};
 
 fn ctype(type_str: &str) -> String {
     match type_str {
@@ -39,7 +42,8 @@ fn merge_map(
                     _ => unreachable!(),
                 },
             )
-        }).collect()
+        })
+        .collect()
 }
 
 fn field_strs(fields: &LinkedHashMap<String, serde_json::Value>) -> String {
@@ -53,14 +57,30 @@ fn field_strs(fields: &LinkedHashMap<String, serde_json::Value>) -> String {
     })
 }
 
+#[derive(Deserialize)]
+struct DriverFile {
+    category: Vec<String>,
+    requires: Option<Vec<String>>,
+    schemas: Option<LinkedHashMap<String, serde_json::Value>>,
+}
+
 fn main() {
-    let drv = DriverData::new(".").unwrap();
+    let mut file = File::open(format!("./{}", DRIVER_FILE)).unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    let data: DriverFile = serde_yaml::from_str(&contents).unwrap();
+
+    let categories: Vec<Category> = data.category.iter().map(|c| c.parse().unwrap()).collect();
+
+    let requires = data.requires.unwrap_or_default();
+    let schemas = data.schemas.unwrap_or_default();
+    let merged_schemas = util::merge_schema_with_global(&requires, &schemas).unwrap();
 
     let mut writer = BufWriter::new(File::create("peripherio.gen.h").unwrap());
     write!(&mut writer, "#include <stddef.h>\n\n"); // for size_t
     write!(&mut writer, "#include <stdint.h>\n\n"); // for int64_t
 
-    let fields = field_strs(drv.schemas());
+    let fields = field_strs(&merged_schemas);
     write!(
         &mut writer,
         "typedef struct Config_ {{\n{}}} __attribute__((__packed__)) Config;\n",
@@ -68,7 +88,7 @@ fn main() {
     );
 
     let mut merged_signs: HashMap<String, Signature> = HashMap::new();
-    for ctg in drv.category() {
+    for ctg in categories {
         for (name, sign) in ctg.signatures().into_iter() {
             let sign: Signature = sign.clone();
             let gs = if let Some(existing_sign) = merged_signs.get(name) {
