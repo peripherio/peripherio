@@ -44,6 +44,14 @@ int i2c_read(int fd, uint8_t reg, uint8_t* dat) {
   return 0;
 }
 
+int i2c_write(int fd, uint8_t reg, uint8_t dat) {
+  uint8_t buf[2] = {reg, dat};
+  if (write(fd, buf, 2) != 2) {
+    return -1;
+  }
+  return 0;
+}
+
 int i2c_read_word(int fd, uint8_t reg, uint16_t* dat) {
   uint8_t high;
   if (i2c_read(fd, reg, &high) != 0) {
@@ -72,6 +80,9 @@ int use_config(Config* conf) {
     return -1;
   }
   if (ioctl(fd, I2C_SLAVE, conf->if_i2c_address) < 0) {
+    return -1;
+  }
+  if (i2c_write(fd, PWR_MGMT_1, 0x00) != 0) {
     return -1;
   }
   return fd;
