@@ -11,6 +11,9 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+pub const CATEGORY_ENV: &str = "PERIPHERIO_CATEGORY";
+pub const CATEGORY_FILE: &str = "category.yml";
+
 #[derive(Deserialize, Clone)]
 pub struct Signature {
     pub args: Option<LinkedHashMap<String, Value>>,
@@ -44,11 +47,11 @@ impl FromStr for Category {
 
 impl Category {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
-        resolve(name, "RAMI_CTG_PATH", "category.yml")
+        resolve(name, CATEGORY_ENV, CATEGORY_FILE)
     }
 
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let mut file = File::open(&path.as_ref().join("category.yml"))?;
+        let mut file = File::open(&path.as_ref().join(CATEGORY_FILE))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let metadata: LibMetaData = serde_yaml::from_str(&contents)?;

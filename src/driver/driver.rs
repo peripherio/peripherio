@@ -19,6 +19,9 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::{fmt, mem, ptr, slice};
 
+pub const DRIVER_ENV: &str = "PERIPHERIO_DRIVER";
+pub const DRIVER_FILE: &str = "peripherio.yml";
+
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Driver(usize);
 
@@ -64,11 +67,11 @@ struct LibMetaData {
 
 impl DriverData {
     pub fn resolve(name: &str) -> Result<PathBuf, Error> {
-        resolve(name, "RAMI_PKG_PATH", "peripherio.yml")
+        resolve(name, DRIVER_ENV, DRIVER_FILE)
     }
 
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let mut file = File::open(&path.as_ref().join("peripherio.yml"))?;
+        let mut file = File::open(&path.as_ref().join(DRIVER_FILE))?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let metadata: LibMetaData = serde_yaml::from_str(&contents)?;
