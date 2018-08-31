@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 use std::{fmt, mem, ptr, slice};
 
 pub const DRIVER_ENV: &str = "PERIPHERIO_DRIVER";
-pub const DRIVER_FILE: &str = "peripherio.yml";
+pub const DRIVER_FILE: &str = "driver.yml";
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Driver(usize);
