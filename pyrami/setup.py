@@ -8,5 +8,6 @@ setup(name='rami',
         author='coord.e',
         author_email='me@coord-e.com',
         url='https://github.com/coord-e/rami',
+        install_requires=['grpcio-tools=1.14.2', 'grpcio>=1.14.2', 'msgpack>=0.5.6'],
         packages=find_packages(),
         )
