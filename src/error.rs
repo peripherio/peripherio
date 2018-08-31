@@ -18,19 +18,13 @@ pub struct UnknownConfigError {
 }
 
 #[derive(Fail, Debug)]
-#[fail(
-    display = "Cannot represent value \"{}\" in JSON format",
-    value
-)]
+#[fail(display = "Cannot represent value \"{}\" in JSON format", value)]
 pub struct InvalidNumberError {
     pub value: f64,
 }
 
 #[derive(Fail, Debug)]
-#[fail(
-    display = "Cannot convert JSON value \"{}\" to number",
-    value
-)]
+#[fail(display = "Cannot convert JSON value \"{}\" to number", value)]
 pub struct InvalidJSONNumberError {
     pub value: Number,
 }
@@ -48,10 +42,7 @@ pub struct CannotResolveError {
 
 #[derive(Fail, Debug)]
 #[fail(
-    display = "Cannot find all required symbols {:?} and {} in driver {}",
-    requires,
-    common,
-    name
+    display = "Cannot find all required symbols {:?} and {} in driver {}", requires, common, name
 )]
 pub struct SymbolsNotEnoughError {
     pub requires: Vec<String>,

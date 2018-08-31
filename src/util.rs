@@ -1,10 +1,10 @@
+use config::global::GLOBAL_SCHEMA;
 use config::Config;
 use error::{InvalidJSONNumberError, InvalidNumberError, TypeNotFoundError, UnknownConfigError};
-use config::global::GLOBAL_SCHEMA;
 
+use failure::Error;
 use linked_hash_map::LinkedHashMap;
 use serde_json::value::{Number, Value};
-use failure::Error;
 
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
@@ -101,9 +101,11 @@ pub fn value_to_c_struct(
                         Error::from(TypeNotFoundError {
                             field: k.to_string(),
                         })
-                    })?.to_string(),
+                    })?
+                    .to_string(),
             ))
-        }).collect::<Result<LinkedHashMap<&String, String>, Error>>()?;
+        })
+        .collect::<Result<LinkedHashMap<&String, String>, Error>>()?;
     let entire_size: usize = types.iter().fold(0, |sum, (_, v)| sum + size_of_type(v));
     let buf = unsafe { alloc(entire_size) };
     let mut filled_size: usize = 0;
@@ -130,12 +132,11 @@ pub fn c_struct_to_value(
     let mut newconf = Config::new();
     let mut retrieved_size: usize = 0;
     for (k, v) in requires {
-        let type_str =
-            v.get("type")
-                .and_then(|v| v.as_str())
-                .ok_or(Error::from(TypeNotFoundError {
-                    field: k.to_string(),
-                }))?;
+        let type_str = v.get("type").and_then(|v| v.as_str()).ok_or(Error::from(
+            TypeNotFoundError {
+                field: k.to_string(),
+            },
+        ))?;
         let size = size_of_type(type_str);
         let val = unsafe {
             let buf = alloc(size);
@@ -163,8 +164,11 @@ pub fn merge_value(a: &mut Value, b: &Value) {
     }
 }
 
-pub fn merge_schema_with_global(requires: &Vec<String>, schemas: &LinkedHashMap<String, Value>) -> Result<LinkedHashMap<String, Value>, Error> {
-        requires
+pub fn merge_schema_with_global(
+    requires: &Vec<String>,
+    schemas: &LinkedHashMap<String, Value>,
+) -> Result<LinkedHashMap<String, Value>, Error> {
+    requires
         .iter()
         .map(|key| {
             Ok((
@@ -177,10 +181,9 @@ pub fn merge_schema_with_global(requires: &Vec<String>, schemas: &LinkedHashMap<
                     }
                     (Some(schema), None) => schema.clone(),
                     (None, Some(v)) => v.clone(),
-                    (None, None) => {
-                        return Err(UnknownConfigError { name: key.clone() }.into())
-                    }
+                    (None, None) => return Err(UnknownConfigError { name: key.clone() }.into()),
                 },
             ))
-        }).collect::<Result<LinkedHashMap<_, _>, Error>>()
+        })
+        .collect::<Result<LinkedHashMap<_, _>, Error>>()
 }

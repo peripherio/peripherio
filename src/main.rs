@@ -40,7 +40,8 @@ impl PeripherioService {
                     pair.get_key().to_string(),
                     rmps::from_slice(&pair.get_value()[..]).unwrap(),
                 )
-            }).collect();
+            })
+            .collect();
         let spec = if let Some(p) = p_spec {
             let empty_or = |v| {
                 if v == "" {

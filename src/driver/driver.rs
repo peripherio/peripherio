@@ -133,7 +133,8 @@ impl DriverData {
                     .ok()
                     .unwrap();
                 sschema.validate(value).is_valid()
-            }).unwrap_or(true)
+            })
+            .unwrap_or(true)
     }
 
     pub fn validate_config(&self, config: &Config) -> bool {

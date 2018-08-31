@@ -30,7 +30,8 @@ impl DriverSpec {
                         .map(|c| c.name())
                         .collect::<Vec<_>>()
                         .contains(&n)
-                }).unwrap_or(true)
+                })
+                .unwrap_or(true)
             && self
                 .vendor
                 .as_ref()

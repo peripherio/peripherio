@@ -1,8 +1,8 @@
 use config::{Config, ConfigValue};
 
+use serde_json::Value;
 use valico::json_schema::schema::{self, CompilationSettings, Schema, ScopedSchema};
 use valico::json_schema::{keywords, Scope};
-use serde_json::Value;
 
 use std::collections::HashMap;
 
@@ -17,22 +17,22 @@ lazy_static! {
                     "spi",
                     "uart"
                 ]
-            })
+            }),
         ),
         (
             "if.i2c.busnum".to_string(),
             json!({
                 "type": "integer"
-            })
+            }),
         ),
         (
             "if.i2c.address".to_string(),
             json!({
                 "type": "integer"
-            })
+            }),
         ),
     ].into_iter()
-    .collect();
+        .collect();
 }
 
 pub fn validate_config_value(key: &str, value: &ConfigValue) -> bool {
@@ -45,7 +45,8 @@ pub fn validate_config_value(key: &str, value: &ConfigValue) -> bool {
                 .ok()
                 .unwrap();
             sschema.validate(value).is_valid()
-        }).unwrap_or(true)
+        })
+        .unwrap_or(true)
 }
 
 pub fn validate_config(config: &Config) -> bool {
