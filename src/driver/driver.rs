@@ -85,25 +85,7 @@ impl DriverData {
 
         let requires = metadata.requires.unwrap_or_default();
         let schemas = metadata.schemas.unwrap_or_default();
-        let merged_schemas = requires
-            .iter()
-            .map(|key| {
-                Ok((
-                    key.clone(),
-                    match (schemas.get(key), GLOBAL_SCHEMA.get(key)) {
-                        (Some(schema), Some(v)) => {
-                            let mut new_val = v.clone();
-                            util::merge_value(&mut new_val, &schema);
-                            new_val
-                        }
-                        (Some(schema), None) => schema.clone(),
-                        (None, Some(v)) => v.clone(),
-                        (None, None) => {
-                            return Err(error::UnknownConfigError { name: key.clone() }.into())
-                        }
-                    },
-                ))
-            }).collect::<Result<LinkedHashMap<_, _>, Error>>()?;
+        let merged_schemas = util::merge_schema_with_global(&requires, &schemas)?;
 
         let inst = DriverData {
             path: path.as_ref().to_path_buf(),

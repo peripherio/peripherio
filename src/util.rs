@@ -1,9 +1,10 @@
 use config::Config;
-use error::{InvalidJSONNumberError, InvalidNumberError, TypeNotFoundError};
+use error::{InvalidJSONNumberError, InvalidNumberError, TypeNotFoundError, UnknownConfigError};
+use config::global::GLOBAL_SCHEMA;
 
-use failure::Error;
 use linked_hash_map::LinkedHashMap;
 use serde_json::value::{Number, Value};
+use failure::Error;
 
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
@@ -160,4 +161,26 @@ pub fn merge_value(a: &mut Value, b: &Value) {
             *a = b.clone();
         }
     }
+}
+
+pub fn merge_schema_with_global(requires: &Vec<String>, schemas: &LinkedHashMap<String, Value>) -> Result<LinkedHashMap<String, Value>, Error> {
+        requires
+        .iter()
+        .map(|key| {
+            Ok((
+                key.clone(),
+                match (schemas.get(key), GLOBAL_SCHEMA.get(key)) {
+                    (Some(schema), Some(v)) => {
+                        let mut new_val = v.clone();
+                        merge_value(&mut new_val, &schema);
+                        new_val
+                    }
+                    (Some(schema), None) => schema.clone(),
+                    (None, Some(v)) => v.clone(),
+                    (None, None) => {
+                        return Err(UnknownConfigError { name: key.clone() }.into())
+                    }
+                },
+            ))
+        }).collect::<Result<LinkedHashMap<_, _>, Error>>()
 }
