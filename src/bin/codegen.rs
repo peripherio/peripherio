@@ -59,8 +59,6 @@ fn main() {
     let mut writer = BufWriter::new(File::create("peripherio.gen.h").unwrap());
     write!(&mut writer, "#include <stddef.h>\n\n"); // for size_t
     write!(&mut writer, "#include <stdint.h>\n\n"); // for int64_t
-    let mut impl_writer = BufWriter::new(File::create(format!("{}.c", drv.name())).unwrap());
-    write!(&mut impl_writer, "#include \"peripherio.gen.h\"\n\n");
 
     let fields = field_strs(drv.schemas());
     write!(
@@ -115,22 +113,8 @@ fn main() {
             "{0}_returns* {0}({0}_args* args, Config* conf);\n",
             name
         );
-        write!(
-            &mut impl_writer,
-            "{0}_returns* {0}({0}_args* args, Config* conf) {{\n  /* Your Implementation! */\n}}\n\n",
-            name
-        );
     }
 
     write!(&mut writer, "void init();\n");
-    write!(
-        &mut impl_writer,
-        "void init() {{\n  /* Your Implementation! */\n}}\n\n"
-    );
-
     write!(&mut writer, "Config** detect(Config*, size_t*);\n");
-    write!(
-        &mut impl_writer,
-        "Config** detect(Config* conf, size_t* size) {{\n  /* Your Implementation! */\n}}\n\n"
-    );
 }
