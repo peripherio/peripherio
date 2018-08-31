@@ -15,7 +15,7 @@ use std::io::{BufWriter, Write};
 fn ctype(type_str: &str) -> String {
     match type_str {
         "number" => "double",
-        "integer" => "long",
+        "integer" => "int64_t",
         "string" => "const char*",
         _ => unimplemented!(),
     }.to_string()
@@ -58,6 +58,7 @@ fn main() {
 
     let mut writer = BufWriter::new(File::create("rami.gen.h").unwrap());
     write!(&mut writer, "#include <stddef.h>\n\n"); // for size_t
+    write!(&mut writer, "#include <stdint.h>\n\n"); // for int64_t
     let mut impl_writer = BufWriter::new(File::create(format!("{}.c", drv.name())).unwrap());
     write!(&mut impl_writer, "#include \"rami.gen.h\"\n\n");
 
