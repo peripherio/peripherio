@@ -353,7 +353,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rami"
+name = "peripherio"
 version = "0.1.0"
 dependencies = [
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",

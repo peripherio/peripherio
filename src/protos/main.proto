@@ -3,11 +3,11 @@ syntax = "proto3";
 import "google/protobuf/any.proto";
 
 option java_multiple_files = true;
-option java_package = "com.y-modify.rami.proto";
+option java_package = "com.y-modify.peripherio.proto";
 option java_outer_classname = "RamiProto";
 option objc_class_prefix = "RMP";
 
-package rami;
+package peripherio;
 
 service Rami {
   /* Device management calls */

@@ -1,5 +1,5 @@
 [package]
-name = "rami"
+name = "peripherio"
 version = "0.1.0"
 authors = ["coord.e <me@coord-e.com>"]
 build = "build.rs"

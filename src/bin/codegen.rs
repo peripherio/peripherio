@@ -1,12 +1,12 @@
 extern crate linked_hash_map;
-extern crate rami;
+extern crate peripherio;
 extern crate serde_json;
 
 use linked_hash_map::LinkedHashMap;
 
-use rami::category::Signature;
-use rami::driver::driver::DriverData;
-use rami::util;
+use peripherio::category::Signature;
+use peripherio::driver::driver::DriverData;
+use peripherio::util;
 
 use std::collections::HashMap;
 use std::fs::File;
@@ -56,11 +56,11 @@ fn field_strs(fields: &LinkedHashMap<String, serde_json::Value>) -> String {
 fn main() {
     let drv = DriverData::new(".").unwrap();
 
-    let mut writer = BufWriter::new(File::create("rami.gen.h").unwrap());
+    let mut writer = BufWriter::new(File::create("peripherio.gen.h").unwrap());
     write!(&mut writer, "#include <stddef.h>\n\n"); // for size_t
     write!(&mut writer, "#include <stdint.h>\n\n"); // for int64_t
     let mut impl_writer = BufWriter::new(File::create(format!("{}.c", drv.name())).unwrap());
-    write!(&mut impl_writer, "#include \"rami.gen.h\"\n\n");
+    write!(&mut impl_writer, "#include \"peripherio.gen.h\"\n\n");
 
     let fields = field_strs(drv.schemas());
     write!(

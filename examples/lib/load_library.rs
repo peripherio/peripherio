@@ -1,7 +1,7 @@
 extern crate libloading;
-extern crate rami;
+extern crate peripherio;
 
-use rami::device::driver::Driver;
+use peripherio::device::driver::Driver;
 
 fn main() {
     let path = Driver::resolve("hello").unwrap();

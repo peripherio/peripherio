@@ -1,5 +1,5 @@
 extern crate grpcio;
-extern crate rami;
+extern crate peripherio;
 extern crate rmp_serde as rmps;
 extern crate serde;
 #[macro_use]
@@ -9,8 +9,8 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use grpcio::{ChannelBuilder, EnvBuilder};
-use rami::protos::main::*;
-use rami::protos::main_grpc::RamiClient;
+use peripherio::protos::main::*;
+use peripherio::protos::main_grpc::RamiClient;
 
 fn get_pair<T: ?Sized>(k: &str, v: &T) -> Config_Pair
 where
