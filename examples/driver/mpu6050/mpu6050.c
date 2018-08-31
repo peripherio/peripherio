@@ -181,7 +181,8 @@ Config** detect(Config* conf, size_t* size) {
   glob_t globbuf;
   glob("/dev/i2c-*", 0, NULL, &globbuf);
   for (int i = 0; i < globbuf.gl_pathc; i++) {
-    int fd = open(globbuf.gl_pathv[i], O_RDWR);
+    const char* path = globbuf.gl_pathv[i];
+    int fd = open(path, O_RDWR);
     if (fd < 0) {
       close(fd);
       return NULL;
@@ -204,9 +205,19 @@ Config** detect(Config* conf, size_t* size) {
       Config* new_config = malloc(sizeof(Config));
       memcpy(new_config, conf, sizeof(Config));
 
-      new_config->if_i2c_speed = 100l;
-      new_config->if_i2c_busnum = i; // FIXME: Maybe have to parse the glob result
+      new_config->if_i2c_speed = (int64_t)100;
       new_config->if_i2c_address = addr;
+
+      /* parse glob result and obtain bus number */
+      unsigned ci = 0;
+      for (ci = strlen(path); ci > 0; ci--) {
+        if (path[ci] == '-') { // 3 in i2c-n
+          break;
+        }
+      }
+      long busnum = strtol(path + ci + 1, NULL, 10);
+      new_config->if_i2c_busnum = busnum;
+
 
       results[results_count++] = new_config;
     }
