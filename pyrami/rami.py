@@ -32,14 +32,14 @@ class Connection(object):
         p_conf = main_pb2.Config(config=list(convconf(config)))
         response = self.stub.Find(
             main_pb2.FindRequest(config=p_conf, spec=p_spec))
-        return (Device(r.id, r.display_name, self) for r in response.results)
+        return [Device(r.id, r.display_name, self) for r in response.results]
 
     def list_device(self, config={}):
         p_spec = main_pb2.DriverSpecification()
         p_conf = main_pb2.Config(config=list(convconf(config)))
         response = self.stub.Find(
             main_pb2.FindRequest(config=p_conf, spec=p_spec))
-        return (Device(r.id, r.display_name, self) for r in response.results)
+        return [Device(r.id, r.display_name, self) for r in response.results]
 
 
 class Device(object):
