@@ -52,7 +52,7 @@ int i2c_write(int fd, uint8_t reg, uint8_t dat) {
   return 0;
 }
 
-int i2c_read_word(int fd, uint8_t reg, uint16_t* dat) {
+int i2c_read_word(int fd, uint8_t reg, int16_t* dat) {
   uint8_t high;
   if (i2c_read(fd, reg, &high) != 0) {
     return -1;
@@ -109,7 +109,7 @@ get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
     return NULL;
   }
 
-  uint16_t x, y, z;
+  int16_t x, y, z;
   i2c_read_word(fd, GYRO_XOUT0, &x);
   i2c_read_word(fd, GYRO_YOUT0, &y);
   i2c_read_word(fd, GYRO_ZOUT0, &z);
@@ -171,7 +171,7 @@ get_temperature_returns* get_temperature(get_temperature_args* args, Config* con
     return NULL;
   }
 
-  uint16_t raw_temp;
+  int16_t raw_temp;
   i2c_read_word(fd, TEMP_OUT0, &raw_temp);
   const double actual_temp = (raw_temp / 340.0) + 36.53;
 
