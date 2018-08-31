@@ -4,12 +4,12 @@ import "google/protobuf/any.proto";
 
 option java_multiple_files = true;
 option java_package = "com.y-modify.peripherio.proto";
-option java_outer_classname = "RamiProto";
+option java_outer_classname = "PeripherioProto";
 option objc_class_prefix = "RMP";
 
 package peripherio;
 
-service Rami {
+service Peripherio {
   /* Device management calls */
   rpc List(Config) returns (FindResponse) {}
   rpc Find(FindRequest) returns (FindResponse) {}

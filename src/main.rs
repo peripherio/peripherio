@@ -19,14 +19,14 @@ use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 use peripherio::device::{self, DeviceManager};
 use peripherio::driver::{Driver, DriverManager, DriverSpec};
 use peripherio::protos::main::*;
-use peripherio::protos::main_grpc::{self, Rami};
+use peripherio::protos::main_grpc::{self, Peripherio};
 
 #[derive(Clone)]
-struct RamiService {
+struct PeripherioService {
     manager: Arc<Mutex<DeviceManager>>,
 }
 
-impl RamiService {
+impl PeripherioService {
     fn find_with_spec(
         &self,
         p_config: &Config,
@@ -83,7 +83,7 @@ impl RamiService {
     }
 }
 
-impl Rami for RamiService {
+impl Peripherio for PeripherioService {
     fn list(&self, ctx: RpcContext, req: Config, sink: UnarySink<FindResponse>) {
         let resp = self.find_with_spec(&req, None);
         let f = sink
@@ -140,7 +140,7 @@ impl Rami for RamiService {
 fn main() {
     let env = Arc::new(Environment::new(1));
     let mut manager = DeviceManager::new().unwrap();
-    let service = main_grpc::create_peripherio(RamiService {
+    let service = main_grpc::create_peripherio(PeripherioService {
         manager: Arc::new(Mutex::new(manager)),
     });
     let mut server = ServerBuilder::new(env)
