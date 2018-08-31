@@ -18,8 +18,8 @@ use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
 use peripherio::device::{self, DeviceManager};
 use peripherio::driver::{Driver, DriverManager, DriverSpec};
-use peripherio::protos::main::*;
-use peripherio::protos::main_grpc::{self, Peripherio};
+use peripherio::protos::peripherio::*;
+use peripherio::protos::peripherio_grpc::{self, Peripherio};
 
 #[derive(Clone)]
 struct PeripherioService {
@@ -140,7 +140,7 @@ impl Peripherio for PeripherioService {
 fn main() {
     let env = Arc::new(Environment::new(1));
     let mut manager = DeviceManager::new().unwrap();
-    let service = main_grpc::create_peripherio(PeripherioService {
+    let service = peripherio_grpc::create_peripherio(PeripherioService {
         manager: Arc::new(Mutex::new(manager)),
     });
     let mut server = ServerBuilder::new(env)

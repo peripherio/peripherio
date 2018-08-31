@@ -1,2 +1,2 @@
-pub mod main;
-pub mod main_grpc;
+pub mod peripherio;
+pub mod peripherio_grpc;

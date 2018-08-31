@@ -9,8 +9,8 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use grpcio::{ChannelBuilder, EnvBuilder};
-use peripherio::protos::main::*;
-use peripherio::protos::main_grpc::PeripherioClient;
+use peripherio::protos::peripherio::*;
+use peripherio::protos::peripherio_grpc::PeripherioClient;
 
 fn get_pair<T: ?Sized>(k: &str, v: &T) -> Config_Pair
 where
