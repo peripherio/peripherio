@@ -9,6 +9,12 @@ grpcio = "*"
 msgpack = "*"
 
 [dev-packages]
+"flake8" = "*"
+"autopep8" = "*"
 
 [requires]
 python_version = "3.6"
+
+[scripts]
+fix = "autopep8 -ivr ."
+lint = "flake8 ."
