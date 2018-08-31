@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
-#include "rami.gen.h"
+#include "peripherio.gen.h"
 
 #define RANGE_2G 0x00
 #define RANGE_4G 0x08

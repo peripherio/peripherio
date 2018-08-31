@@ -1,4 +1,4 @@
-from rami import connect
+from peripherio import connect
 import time
 
 with connect() as conn:

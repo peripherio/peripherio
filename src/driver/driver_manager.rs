@@ -21,7 +21,7 @@ impl DriverManager {
     }
 
     pub fn load_all(&mut self) -> Result<(), Error> {
-        self.drivers = resolve::paths("RAMI_PKG_PATH", "rami.yml")?
+        self.drivers = resolve::paths("RAMI_PKG_PATH", "peripherio.yml")?
             .enumerate()
             .map(|(i, path)| Ok((Driver::new(i), DriverData::new(path)?)))
             .collect::<Result<_, Error>>()?;

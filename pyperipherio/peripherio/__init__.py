@@ -10,7 +10,7 @@ import contextlib
 @contextlib.contextmanager
 def connect(uri='localhost:50051'):
     with grpc.insecure_channel(uri) as channel:
-        stub = main_pb2_grpc.RamiStub(channel)
+        stub = main_pb2_grpc.PeripherioStub(channel)
         conn = Connection(stub)
         try:
             yield conn

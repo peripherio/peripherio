@@ -1,5 +1,5 @@
 extern crate grpcio;
-extern crate rami;
+extern crate peripherio;
 extern crate rmp_serde as rmps;
 extern crate serde;
 #[macro_use]
@@ -9,8 +9,8 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use grpcio::{ChannelBuilder, EnvBuilder};
-use rami::protos::main::*;
-use rami::protos::main_grpc::RamiClient;
+use peripherio::protos::main::*;
+use peripherio::protos::main_grpc::PeripherioClient;
 
 fn get_pair<T: ?Sized>(k: &str, v: &T) -> Config_Pair
 where
@@ -25,7 +25,7 @@ where
 fn main() {
     let env = Arc::new(EnvBuilder::new().build());
     let ch = ChannelBuilder::new(env).connect("localhost:50051");
-    let client = RamiClient::new(ch);
+    let client = PeripherioClient::new(ch);
 
     let start = Instant::now();
     let mut req = Config::new();
