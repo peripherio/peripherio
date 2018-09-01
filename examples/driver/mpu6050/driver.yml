@@ -3,8 +3,8 @@ version: "0.1"
 author: "coord.e <me@coord-e.com>"
 category: ["accelerometer", "gyro", "thermometer"]
 driver: "driver.so"
-requires: ["if.type", "if.i2c.speed", "if.i2c.busnum", "if.i2c.address"]
-detects: ["if.i2c.speed", "if.i2c.busnum", "if.i2c.address"]
+requires: ["if.type", "if.i2c.speed", "if.i2c.busnum", "if.i2c.address", "mpu6050.fd"]
+detects: ["if.i2c.speed", "if.i2c.busnum", "if.i2c.address", "mpu6050.fd"]
 schemas:
   if.type:
     type: "string"
@@ -15,4 +15,6 @@ schemas:
   if.i2c.busnum:
     type: "integer"
   if.i2c.address:
+    type: "integer"
+  mpu6050.fd:
     type: "integer"
