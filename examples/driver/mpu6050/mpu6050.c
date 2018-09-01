@@ -73,19 +73,13 @@ int i2c_read_word(int fd, uint8_t reg, int16_t* dat) {
 }
 
 int use_config(Config* conf) {
-  char dev[15];
-  sprintf(dev, "/dev/i2c-%d", conf->if_i2c_busnum);
-  int fd = open(dev, O_RDWR);
-  if (fd < 0) {
+  if (ioctl(conf->mpu6050_fd, I2C_SLAVE, conf->if_i2c_address) < 0) {
     return -1;
   }
-  if (ioctl(fd, I2C_SLAVE, conf->if_i2c_address) < 0) {
+  if (i2c_write(conf->mpu6050_fd, PWR_MGMT_1, 0x00) != 0) {
     return -1;
   }
-  if (i2c_write(fd, PWR_MGMT_1, 0x00) != 0) {
-    return -1;
-  }
-  return fd;
+  return 0;
 }
 
 int range_to_mod(uint8_t raw_data) {
@@ -104,10 +98,8 @@ int range_to_mod(uint8_t raw_data) {
 }
 
 get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
-  int fd = use_config(conf);
-  if (fd < 0) {
-    return NULL;
-  }
+  use_config(conf);
+  int fd = conf->mpu6050_fd;
 
   int16_t x, y, z;
   i2c_read_word(fd, GYRO_XOUT0, &x);
@@ -130,15 +122,12 @@ get_gyro_returns* get_gyro(get_gyro_args* args, Config* conf) {
   res->y = y / gyro_scale_modifier;
   res->z = z / gyro_scale_modifier;
 
-  close(fd);
   return res;
 }
 
 get_accel_returns* get_accel(get_accel_args* args, Config* conf) {
-  int fd = use_config(conf);
-  if (fd < 0) {
-    return NULL;
-  }
+  use_config(conf);
+  int fd = conf->mpu6050_fd;
 
   uint8_t x, y, z;
   i2c_read(fd, ACCEL_XOUT0, &x);
@@ -161,15 +150,12 @@ get_accel_returns* get_accel(get_accel_args* args, Config* conf) {
   res->y = y / accel_scale_modifier * GRAVITY_MS2;
   res->z = z / accel_scale_modifier * GRAVITY_MS2;
 
-  close(fd);
   return res;
 }
 
 get_temperature_returns* get_temperature(get_temperature_args* args, Config* conf) {
-  int fd = use_config(conf);
-  if (fd < 0) {
-    return NULL;
-  }
+  use_config(conf);
+  int fd = conf->mpu6050_fd;
 
   int16_t raw_temp;
   i2c_read_word(fd, TEMP_OUT0, &raw_temp);
@@ -178,7 +164,6 @@ get_temperature_returns* get_temperature(get_temperature_args* args, Config* con
   get_temperature_returns* res = malloc(sizeof(get_temperature_returns));
   res->value = actual_temp;
 
-  close(fd);
   return res;
 }
 
