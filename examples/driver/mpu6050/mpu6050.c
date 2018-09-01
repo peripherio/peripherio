@@ -198,6 +198,7 @@ Config** detect(Config* conf, size_t* size) {
       close(fd);
       return NULL;
     }
+    unsigned count_per_fd = 0;
     for (uint8_t addr = 0x03; addr < 0x78; addr++) {
       if (ioctl(fd, I2C_SLAVE, addr) < 0) {
         continue;
@@ -228,11 +229,13 @@ Config** detect(Config* conf, size_t* size) {
       }
       long busnum = strtol(path + ci + 1, NULL, 10);
       new_config->if_i2c_busnum = busnum;
-
+      new_config->mpu6050_fd = fd;
 
       results[results_count++] = new_config;
+      count_per_fd++;
     }
-    close(fd);
+    if(count_per_fd == 0)
+      close(fd);
   }
   globfree(&globbuf);
 
