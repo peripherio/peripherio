@@ -32,6 +32,10 @@ pipenv install
 pipenv run python examples/simple_get_gyro.py
 ```
 
+## Architecture
+
+![architecture](docs/architecture.png)
+
 ## License
 
 Licensed under either of
