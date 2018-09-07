@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};
 use std::{io, thread};
+use std::env;
 
 use futures::sync::oneshot;
 use futures::Future;
@@ -144,9 +145,11 @@ fn main() {
     let service = peripherio_grpc::create_peripherio(PeripherioService {
         manager: Arc::new(Mutex::new(manager)),
     });
+    let host = env::var("PERIPHERIO_HOST").unwrap_or("127.0.0.1".to_string());
+    let port = env::var("PERIPHERIO_PORT").unwrap_or("50051".to_string());
     let mut server = ServerBuilder::new(env)
         .register_service(service)
-        .bind("127.0.0.1", 50051)
+        .bind(host, port.parse().unwrap())
         .build()
         .unwrap();
     server.start();
