@@ -36,6 +36,19 @@ pipenv run python examples/simple_get_gyro.py
 
 ![architecture](docs/architecture.png)
 
+## Progress
+
+- [x] Category-based abstruction
+- [x] Device auto detection
+- [x] Driver + Config → Device
+- [x] gRPC Server
+- [ ] Docker
+- [ ] Client application (e.g. `lsperi`)
+- [ ] mock driver (Simulator?)
+- [ ] Add more examples
+- [ ] Config injection from preference file
+- [ ] Driver Package Management
+
 ## License
 
 Licensed under either of
