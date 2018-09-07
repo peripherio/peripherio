@@ -158,9 +158,7 @@ fn main() {
     }
     let (tx, rx) = oneshot::channel();
     thread::spawn(move || {
-        let stdout = io::stdout();
-        let _ = writeln!(&mut stdout.lock(), "Press ENTER to exit...");
-        let _ = io::stdin().read(&mut [0]).unwrap();
+        loop {}
         tx.send(())
     });
     let _ = rx.wait();
