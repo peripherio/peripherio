@@ -3,6 +3,7 @@ name = "peripherio"
 version = "0.1.0"
 authors = ["coord.e <me@coord-e.com>"]
 build = "build.rs"
+license = "MIT/Apache-2.0"
 
 [[example]]
 name = "client"
