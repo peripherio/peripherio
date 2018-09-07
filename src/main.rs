@@ -6,6 +6,7 @@ extern crate grpcio;
 extern crate peripherio;
 extern crate rmp_serde as rmps;
 extern crate serde_json;
+extern crate daemonize;
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
