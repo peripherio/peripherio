@@ -7,10 +7,12 @@ extern crate peripherio;
 extern crate rmp_serde as rmps;
 extern crate serde_json;
 extern crate daemonize;
+extern crate ctrlc;
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{io, thread};
 use std::env;
 
@@ -159,12 +161,14 @@ fn main() {
     for &(ref host, port) in server.bind_addrs() {
         println!("listening on {}:{}", host, port);
     }
-    let (tx, rx) = oneshot::channel();
-    thread::spawn(move || {
-        tx.send(())
-    });
-    loop {}
-    let _ = rx.wait();
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Error setting Ctrl-C handler");
+    println!("Ctrl-C to exit...");
+    while running.load(Ordering::SeqCst) {}
+
     let _ = server.shutdown().wait();
     let daemonize = Daemonize::new()
         // .pid_file("/tmp/.pid")
