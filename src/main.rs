@@ -140,6 +140,8 @@ impl Peripherio for PeripherioService {
     }
 }
 
+use daemonize::Daemonize;
+
 fn main() {
     let env = Arc::new(Environment::new(1));
     let mut manager = DeviceManager::new().unwrap();
@@ -159,9 +161,20 @@ fn main() {
     }
     let (tx, rx) = oneshot::channel();
     thread::spawn(move || {
-        loop {}
         tx.send(())
     });
+    loop {}
     let _ = rx.wait();
     let _ = server.shutdown().wait();
+    let daemonize = Daemonize::new()
+        // .pid_file("/tmp/.pid")
+        .working_directory("/tmp")
+        // .stdout(stdout)  // Redirect stdout to `/tmp/daemon.out`.
+        // .stderr(stderr)  // Redirect stderr to `/tmp/daemon.err`.
+        .privileged_action(|| "Executed before drop privileges");
+
+    match daemonize.start() {
+        Ok(_) => println!("Success, daemonized"),
+        Err(e) => eprintln!("Error, {}", e),
+    }
 }
