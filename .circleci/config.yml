@@ -17,8 +17,8 @@ jobs:
       - run:
           name: Build image
           command: |
-            docker build -t peripherio/peripherio:amd64 --build-arg CARGO_TARGET=x86_64-unknown-linux-musl --build-arg TARGET_TAG=x86_64-musl .
-            docker build -t peripherio/peripherio:armhf --build-arg CARGO_TARGET=arm-unknown-linux-musleabihf --build-arg TARGET_TAG=arm-musleabihf .
+            docker build -t peripherio/peripherio:amd64 --build-arg CARGO_TARGET=x86_64-unknown-linux-musl --build-arg TARGET_TAG=x86_64-musl --build-arg ALPINE_DIGEST=02892826401a9d18f0ea01f8a2f35d328ef039db4e1edcc45c630314a0457d5b .
+            docker build -t peripherio/peripherio:armhf --build-arg CARGO_TARGET=arm-unknown-linux-musleabihf --build-arg TARGET_TAG=arm-musleabihf --build-arg ALPINE_DIGEST=acc1c7fcb0bcd59a2becdc3342204d30c0aa1009b3a2bd954536338acfe0bded .
       - run:
           name: Push the image
           command: |

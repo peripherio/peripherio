@@ -19,7 +19,9 @@ COPY . ./
 
 RUN cargo build --release --target=${CARGO_TARGET}
 
-FROM alpine:3.8
+ARG ALPINE_DIGEST=02892826401a9d18f0ea01f8a2f35d328ef039db4e1edcc45c630314a0457d5b
+
+FROM alpine@${ALPINE_DIGEST}
 
 ARG CARGO_TARGET=x86_64-unknown-linux-musl
 
