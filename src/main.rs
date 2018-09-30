@@ -6,11 +6,14 @@ extern crate grpcio;
 extern crate peripherio;
 extern crate rmp_serde as rmps;
 extern crate serde_json;
+extern crate ctrlc;
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{io, thread};
+use std::env;
 
 use futures::sync::oneshot;
 use futures::Future;
@@ -144,22 +147,24 @@ fn main() {
     let service = peripherio_grpc::create_peripherio(PeripherioService {
         manager: Arc::new(Mutex::new(manager)),
     });
+    let host = env::var("PERIPHERIO_HOST").unwrap_or("127.0.0.1".to_string());
+    let port = env::var("PERIPHERIO_PORT").unwrap_or("50051".to_string());
     let mut server = ServerBuilder::new(env)
         .register_service(service)
-        .bind("127.0.0.1", 50051)
+        .bind(host, port.parse().unwrap())
         .build()
         .unwrap();
     server.start();
     for &(ref host, port) in server.bind_addrs() {
         println!("listening on {}:{}", host, port);
     }
-    let (tx, rx) = oneshot::channel();
-    thread::spawn(move || {
-        let stdout = io::stdout();
-        let _ = writeln!(&mut stdout.lock(), "Press ENTER to exit...");
-        let _ = io::stdin().read(&mut [0]).unwrap();
-        tx.send(())
-    });
-    let _ = rx.wait();
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Error setting Ctrl-C handler");
+    println!("Ctrl-C to exit...");
+    while running.load(Ordering::SeqCst) {}
+
     let _ = server.shutdown().wait();
 }
