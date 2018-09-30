@@ -24,7 +24,7 @@ where
 
 fn main() {
     let env = Arc::new(EnvBuilder::new().build());
-    let ch = ChannelBuilder::new(env).connect("localhost:50051");
+    let ch = ChannelBuilder::new(env).connect("localhost:57601");
     let client = PeripherioClient::new(ch);
 
     let start = Instant::now();

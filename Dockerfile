@@ -31,10 +31,10 @@ RUN mkdir -p /lib/peripherio/drivers /lib/peripherio/categories
 ENV PERIPHERIO_DRIVER /lib/peripherio/drivers
 ENV PERIPHERIO_CATEGORY /lib/peripherio/categories
 ENV PERIPHERIO_HOST 0.0.0.0
-ENV PERIPHERIO_PORT 50051
+ENV PERIPHERIO_PORT 57601
 
 VOLUME ["/lib/peripherio/drivers", "/lib/peripherio/categories"]
 
-EXPOSE 50051
+EXPOSE 57601
 
 CMD ["/usr/bin/peripherio"]
