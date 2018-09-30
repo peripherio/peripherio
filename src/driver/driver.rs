@@ -1,5 +1,4 @@
 use category::{Category, Signature};
-use config::global::GLOBAL_SCHEMA;
 use config::{Config, ConfigValue};
 use driver::libloading::{Library, Symbol};
 use error;
@@ -10,14 +9,13 @@ use failure::Error;
 use linked_hash_map::LinkedHashMap;
 use serde_json;
 use serde_yaml;
-use valico::json_schema::schema::{self, CompilationSettings, Schema, ScopedSchema};
-use valico::json_schema::{self, keywords, Scope};
+use valico::json_schema::Scope;
 
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::{fmt, mem, ptr, slice};
+use std::slice;
 
 pub const DRIVER_ENV: &str = "PERIPHERIO_DRIVER";
 pub const DRIVER_FILE: &str = "driver.yml";

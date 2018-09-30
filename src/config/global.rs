@@ -1,8 +1,6 @@
 use config::{Config, ConfigValue};
 
-use serde_json::Value;
-use valico::json_schema::schema::{self, CompilationSettings, Schema, ScopedSchema};
-use valico::json_schema::{keywords, Scope};
+use valico::json_schema::Scope;
 
 use std::collections::HashMap;
 
