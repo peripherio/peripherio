@@ -6,7 +6,7 @@ FROM messense/rust-musl-cross:${TARGET_TAG}
 ARG CARGO_TARGET=x86_64-unknown-linux-musl
 
 RUN apt-get update
-RUN apt-get -y --no-install-recommends install cmake build-essential golang protobuf-compiler unzip wget
+RUN apt-get -y --no-install-recommends install cmake build-essential golang unzip wget
 RUN cd /tmp \
     && mkdir protoc && cd protoc \
     && wget -q https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip \
