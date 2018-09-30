@@ -42,7 +42,7 @@ pipenv run python examples/simple_get_gyro.py
 - [x] Device auto detection
 - [x] Driver + Config → Device
 - [x] gRPC Server
-- [ ] Docker
+- [x] Docker
 - [ ] Client application (e.g. `lsperi`)
 - [ ] mock driver (Simulator?)
 - [ ] Add more examples
