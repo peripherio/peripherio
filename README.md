@@ -3,7 +3,6 @@
 [![CircleCI](https://circleci.com/gh/peripherio/peripherio.svg?style=svg)](https://circleci.com/gh/peripherio/peripherio)
 [![MicroBadger Size](https://img.shields.io/microbadger/image-size/peripherio/peripherio.svg?style=flat-square)](https://microbadger.com/images/peripherio/peripherio)
 [![MicroBadger Layers](https://img.shields.io/microbadger/layers/peripherio/peripherio.svg?style=flat-square)](https://microbadger.com/images/peripherio/peripherio)
-[![license](https://img.shields.io/github/license/peripherio/peripherio.svg?style=flat-square)](LICENSE)
 
 The peripheral interface abstraction
 
