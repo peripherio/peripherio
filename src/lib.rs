@@ -18,6 +18,7 @@ extern crate rand;
 extern crate serde_yaml;
 extern crate valico;
 extern crate clap;
+extern crate rmp_serde as rmps;
 
 #[macro_use]
 extern crate failure;
