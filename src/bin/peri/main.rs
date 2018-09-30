@@ -1,10 +1,16 @@
 extern crate clap;
 extern crate peripherio;
+extern crate grpcio;
 
+use grpcio::{ChannelBuilder, EnvBuilder};
 use clap::{Arg, App, SubCommand};
 
+use peripherio::protos::peripherio_grpc::PeripherioClient;
 use peripherio::subcommand;
+
 use std::env;
+use std::sync::Arc;
+
 
 fn main() {
     let matches = App::new("peripherio client")
@@ -34,7 +40,11 @@ fn main() {
     let host = matches.value_of("hostname").or(host_env.as_ref().map(|x| &**x).ok()).unwrap_or("localhost");
     let port = matches.value_of("port").or(port_env.as_ref().map(|x| &**x).ok()).unwrap_or("57601");
 
+    let env = Arc::new(EnvBuilder::new().build());
+    let ch = ChannelBuilder::new(env).connect(&format!("{}:{}", host, port));
+    let client = PeripherioClient::new(ch);
+
     if let Some(matches) = matches.subcommand_matches("device") {
-        subcommand::device::main(matches);
+        subcommand::device::main(&client, matches);
     }
 }

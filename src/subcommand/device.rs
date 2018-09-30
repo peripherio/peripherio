@@ -1,7 +1,9 @@
 use failure::Error;
 use clap::ArgMatches;
 
-pub fn main(matches: &ArgMatches) -> Result<(), Error> {
+use protos::peripherio_grpc::PeripherioClient;
+
+pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
     Ok(())
 }
 
