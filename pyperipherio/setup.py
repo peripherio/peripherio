@@ -2,12 +2,21 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.install import install
+from setuptools.command.egg_info import egg_info
 from subprocess import check_call
+
+def generate_stub():
+    check_call('protoc --python_out=peripherio --grpc_out=peripherio --plugin=protoc-gen-grpc=`which grpc_python_plugin` --proto_path=../protos/ peripherio.proto'.split())
 
 class PostInstallCommand(install):
     def run(self):
-        check_call('protoc --python_out=peripherio --grpc_out=peripherio --plugin=protoc-gen-grpc=`which grpc_python_plugin` --proto_path=../protos/ peripherio.proto'.split())
+        generate_stub()
         install.run(self)
+
+class PostEggInfoCommand(egg_info):
+    def run(self):
+        generate_stub()
+        egg_info.run(self)
 
 
 setup(name='peripherio',
@@ -20,5 +29,6 @@ setup(name='peripherio',
         packages=find_packages(),
         cmdclass={
             'install': PostInstallCommand,
+            'egg_info': PostEggInfoCommand,
         },
         )
