@@ -1,4 +1,5 @@
 ARG TARGET_TAG=x86_64-musl
+ARG ALPINE_DIGEST=sha256:02892826401a9d18f0ea01f8a2f35d328ef039db4e1edcc45c630314a0457d5b
 
 FROM messense/rust-musl-cross:${TARGET_TAG}
 
@@ -18,8 +19,6 @@ RUN ln -s /usr/bin/g++ /usr/bin/musl-g++
 COPY . ./
 
 RUN cargo build --release --target=${CARGO_TARGET}
-
-ARG ALPINE_DIGEST=02892826401a9d18f0ea01f8a2f35d328ef039db4e1edcc45c630314a0457d5b
 
 FROM alpine@${ALPINE_DIGEST}
 
