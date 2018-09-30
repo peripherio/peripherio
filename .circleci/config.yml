@@ -13,7 +13,7 @@ jobs:
           name: Build image
           command: |
             docker build -t peripherio/peripherio:amd64 --build-arg CARGO_TARGET=x86_64-unknown-linux-musl --build-arg TARGET_TAG=x86_64-musl .
-            docker build -t peripherio/peripherio:armhf --build-arg CARGO_TARGET=armv7-unknown-linux-musleabihf --build-arg TARGET_TAG=arm-musleabihf .
+            docker build -t peripherio/peripherio:armhf --build-arg CARGO_TARGET=arm-unknown-linux-musleabihf --build-arg TARGET_TAG=arm-musleabihf .
       - run:
           name: Push the image
           command: |
