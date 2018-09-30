@@ -1,22 +1,29 @@
-FROM rust:1.28.0-slim-stretch
+FROM ekidd/rust-musl-builder:1.28.0
 
-COPY . /build
+ADD . ./
 
-WORKDIR /tmp
-RUN apt-get update \
-    && apt-get -y --no-install-recommends install cmake build-essential golang protobuf-compiler unzip wget \
+RUN sudo chown -R rust:rust /home/rust
+
+RUN sudo apt-get update \
+    && sudo apt-get -y --no-install-recommends install cmake build-essential golang protobuf-compiler unzip wget \
     && cd /tmp \
+    && mkdir protoc && cd protoc \
     && wget -q https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip \
     && unzip protoc-*.zip \
-    && cp bin/* /usr/local/bin/ \
-    && cp -r include/google /usr/local/include/ \
-    && cd /build && cargo build --release \
-    && cp /build/target/release/peripherio /usr/bin \
-    && cd / && rm /tmp/* -rf \
-    && apt-get -y remove cmake protobuf-compiler unzip wget build-essential \
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && sudo cp bin/* /usr/local/bin/ \
+    && sudo cp -r include/google /usr/local/include/ \
+    && cd .. \
+    && rm -r protoc
+
+RUN sudo ln -s /usr/bin/g++ /usr/bin/musl-g++
+
+RUN cargo build --release
+
+FROM alpine:3.8
+
+RUN apk --no-cache add ca-certificates
+
+COPY --from=0 /build/target/x86_64-unknown-linux-musl/release/peripherio /usr/bin
 
 ENV PERIPHERIO_HOST 0.0.0.0
 ENV PERIPHERIO_PORT 50051
