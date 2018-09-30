@@ -13,11 +13,11 @@ RUN sudo ln -s /usr/bin/g++ /usr/bin/musl-g++
 
 COPY --chown=rust:rust . ./
 
-RUN cargo build --release
+RUN cargo build --release --target=${TARGET}
 
 FROM alpine:3.8
 
-COPY --from=0 /home/rust/src/target/x86_64-unknown-linux-musl/release/peripherio /usr/bin
+COPY --from=0 /home/rust/src/target/${TARGET}/release/peripherio /usr/bin
 
 ENV PERIPHERIO_HOST 0.0.0.0
 ENV PERIPHERIO_PORT 50051
