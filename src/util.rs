@@ -9,6 +9,7 @@ use serde_json::value::{Number, Value};
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::{fmt, mem, ptr, slice};
+use std::os::raw::c_char;
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);
@@ -53,7 +54,7 @@ pub unsafe fn cast_to_ptr(type_str: &str, v: &Value) -> Result<*const u8, Error>
         }
         Value::String(s) => {
             let ptr = CString::new(s.clone())?.into_raw();
-            mem::transmute::<&*mut i8, *const u8>(&ptr) // ptr
+            mem::transmute::<&*mut c_char, *const u8>(&ptr) // ptr
         }
         // Value::Array(ary) => Box::into_raw(ary.clone().into_boxed_slice()) as *const u8, // ptr
         /*Value::Object => 8, Write someday // ptr */
@@ -76,7 +77,7 @@ pub unsafe fn cast_from_ptr(type_str: &str, ptr: *const u8) -> Result<Value, Err
             )
         }
         "string" => {
-            let sp = mem::transmute::<*const u8, &*mut i8>(ptr); // ptr
+            let sp = mem::transmute::<*const u8, &*mut c_char>(ptr); // ptr
             let cstr = CStr::from_ptr(*sp);
             Value::String(cstr.to_str()?.to_string())
         }
