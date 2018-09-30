@@ -12,15 +12,17 @@ jobs:
       - run:
           name: Build image
           command: |
-            docker build -t peripherio/peripherio:arm --build-arg TARGET=armv7-unknown-linux-musleabihf .
-            docker build -t peripherio/peripherio:x86 --build-arg TARGET=x86_64-unknown-linux-musl .
+            docker build -t peripherio/peripherio:armhf --build-arg TARGET=armv7-unknown-linux-musleabihf .
+            docker build -t peripherio/peripherio:x86_64 --build-arg TARGET=x86_64-unknown-linux-musl .
       - run:
           name: Create manifest
           command: |
             docker manifest create \
               peripherio/peripherio:latest \
-              peripherio/peripherio:linux \
-              peripherio/peripherio:arm
+              peripherio/peripherio:armhf \
+              peripherio/peripherio:x86_64
+            docker manifest annotate --os linux --arch armhf peripherio/peripherio:latest peripherio/peripherio:armhf
+            docker manifest annotate --os linux --arch x86_64 peripherio/peripherio:latest peripherio/peripherio:x86_64
       - run:
           name: Push
           command: |
