@@ -103,7 +103,7 @@ impl DeviceManager {
     }
 
     pub fn get_name_device(&self, name: &str) -> Option<&Device> {
-        self.names.iter().find(|(k, v)| *v == name).map(|v| v.0)
+        self.names.iter().find(|(_k, v)| *v == name).map(|v| v.0)
     }
 }
 
