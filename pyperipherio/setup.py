@@ -6,7 +6,9 @@ from setuptools.command.egg_info import egg_info
 from grpc_tools.protoc import main
 
 def generate_stub():
-     main('grpc_tools.protoc -I . --python_out=. --grpc_python_out=. peripherio/peripherio.proto'.split())
+    cmd = 'grpc_tools.protoc -I . --python_out=. --grpc_python_out=. peripherio/peripherio.proto'.split()
+    if main(cmd) != 0:
+        raise RuntimeError('protoc failed: ' + ' '.join(cmd))
 
 class PostInstallCommand(install):
     def run(self):
