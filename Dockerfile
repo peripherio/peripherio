@@ -1,6 +1,6 @@
 FROM ekidd/rust-musl-builder:1.28.0
 
-ADD --chown=rust:rust . ./
+COPY --chown=rust:rust . ./
 
 RUN sudo apt-get update \
     && sudo apt-get -y --no-install-recommends install cmake build-essential golang protobuf-compiler unzip wget \
