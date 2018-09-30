@@ -1,26 +1,23 @@
 #![allow(unknown_lints)]
 #![allow(unreadable_literal)]
 
+extern crate ctrlc;
 extern crate futures;
 extern crate grpcio;
 extern crate peripherio;
 extern crate rmp_serde as rmps;
 extern crate serde_json;
-extern crate ctrlc;
 
 use std::collections::HashMap;
-use std::io::{Read, Write};
-use std::sync::{Arc, Mutex};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::{io, thread};
 use std::env;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 
-use futures::sync::oneshot;
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
 use peripherio::device::{self, DeviceManager};
-use peripherio::driver::{Driver, DriverManager, DriverSpec};
+use peripherio::driver::{Driver, DriverSpec};
 use peripherio::protos::peripherio::*;
 use peripherio::protos::peripherio_grpc::{self, Peripherio};
 
@@ -143,7 +140,7 @@ impl Peripherio for PeripherioService {
 
 fn main() {
     let env = Arc::new(Environment::new(1));
-    let mut manager = DeviceManager::new().unwrap();
+    let manager = DeviceManager::new().unwrap();
     let service = peripherio_grpc::create_peripherio(PeripherioService {
         manager: Arc::new(Mutex::new(manager)),
     });
