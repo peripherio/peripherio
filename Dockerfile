@@ -1,4 +1,4 @@
-FROM ekidd/rust-musl-builder:1.28.0
+FROM messense/rust-musl-cross:${TARGET_TAG}
 
 RUN sudo apt-get update
 RUN sudo apt-get -y --no-install-recommends install cmake build-essential golang protobuf-compiler unzip wget

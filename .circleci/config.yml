@@ -12,8 +12,8 @@ jobs:
       - run:
           name: Build image
           command: |
-            docker build -t peripherio/peripherio:armhf --build-arg TARGET=armv7-unknown-linux-musleabihf .
-            docker build -t peripherio/peripherio:x86_64 --build-arg TARGET=x86_64-unknown-linux-musl .
+            docker build -t peripherio/peripherio:x86_64 --build-arg TARGET=x86_64-unknown-linux-musl --build-arg TARGET_TAG=x86_64-musl .
+            docker build -t peripherio/peripherio:armhf --build-arg TARGET=armv7-unknown-linux-musleabihf --build-arg TARGET_TAG=arm-musleabihf .
       - run:
           name: Create manifest
           command: |
