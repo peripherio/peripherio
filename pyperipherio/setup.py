@@ -3,12 +3,10 @@
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.egg_info import egg_info
-from subprocess import check_call, check_output
-from grpc_tools import protoc
+from grpc_tools.protoc import main
 
 def generate_stub():
-    plugin = check_output(['which', 'grpc_python_plugin']).decode()
-    protoc.main('--python_out=peripherio --grpc_out=peripherio --plugin=protoc-gen-grpc={} --proto_path=../protos/ peripherio.proto'.format(plugin).split())
+     main('grpc_tools.protoc -I . --python_out=. --grpc_python_out=. peripherio/peripherio.proto'.split())
 
 class PostInstallCommand(install):
     def run(self):

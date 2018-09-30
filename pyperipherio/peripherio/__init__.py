@@ -1,8 +1,8 @@
 import grpc
 import msgpack
 
-import peripherio_pb2
-import peripherio_pb2_grpc
+from peripherio import peripherio_pb2
+from peripherio import peripherio_pb2_grpc
 
 import contextlib
 
