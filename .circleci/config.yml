@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Enable the experimental feature of Docker CLI
-          command: echo '{"experimental": "enabled"}' > ~/.docker/config.json
+          command: "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
       - setup_remote_docker
       - run:
           name: Login
