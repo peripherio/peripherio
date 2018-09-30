@@ -7,10 +7,11 @@ use protos::peripherio_grpc::PeripherioClient;
 use protos::peripherio::Config;
 
 pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
-    match matches.subcommand_name() {
-        Some("ls") => list(client, matches.subcommand_matches("ls").unwrap()),
-        _ => Ok(println!("{}", matches.usage()))
-    }
+    Ok(if let Some(matches) = matches.subcommand_matches("ls") {
+        list(client, matches)?
+    } else {
+        println!("{}", matches.usage())
+    })
 }
 
 pub fn list(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {

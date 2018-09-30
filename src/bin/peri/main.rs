@@ -45,6 +45,8 @@ fn main() {
     let client = PeripherioClient::new(ch);
 
     if let Some(matches) = matches.subcommand_matches("device") {
-        subcommand::device::main(&client, matches);
+        subcommand::device::main(&client, matches).unwrap();
+    } else {
+        println!("{}", matches.usage());
     }
 }
