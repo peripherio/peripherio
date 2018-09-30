@@ -17,8 +17,6 @@ RUN cargo build --release
 
 FROM alpine:3.8
 
-RUN apk --no-cache add ca-certificates
-
 COPY --from=0 /home/rust/src/target/x86_64-unknown-linux-musl/release/peripherio /usr/bin
 
 ENV PERIPHERIO_HOST 0.0.0.0
