@@ -1,5 +1,5 @@
 use config::Config;
-use driver::driver::{Driver, DriverData};
+use driver::driver::{Driver, DriverData, DRIVER_ENV, DRIVER_FILE};
 use driver::driver_spec::DriverSpec;
 use error::DriverNotFoundError;
 use resolve;
@@ -21,7 +21,7 @@ impl DriverManager {
     }
 
     pub fn load_all(&mut self) -> Result<(), Error> {
-        self.drivers = resolve::paths("RAMI_PKG_PATH", "peripherio.yml")?
+        self.drivers = resolve::paths(DRIVER_ENV, DRIVER_FILE)?
             .enumerate()
             .map(|(i, path)| Ok((Driver::new(i), DriverData::new(path)?)))
             .collect::<Result<_, Error>>()?;
