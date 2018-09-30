@@ -8,7 +8,7 @@ use serde_json::value::{Number, Value};
 
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
-use std::{fmt, mem, ptr, slice};
+use std::{mem, ptr, slice};
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);

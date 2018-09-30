@@ -1,4 +1,4 @@
-use serde_json::value::{Number, Value};
+use serde_json::value::Number;
 use valico::json_schema;
 
 #[derive(Fail, Debug)]

@@ -5,7 +5,7 @@ use driver::driver::{Driver, DriverData};
 use driver::driver_manager::DriverManager;
 
 use failure::Error;
-use rand::{thread_rng, Rng, ThreadRng};
+use rand::{thread_rng, Rng};
 
 use std::collections::HashMap;
 

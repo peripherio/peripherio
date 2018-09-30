@@ -1,6 +1,3 @@
-use config::Config;
-use driver::driver::Driver;
-
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Device(usize);
 
