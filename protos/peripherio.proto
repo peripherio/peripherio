@@ -73,10 +73,9 @@ message DriverSpecification {
 
 message Driver {
   string name = 1;
-  string version = 2;
-  string vendor = 3;
-  string path = 4;
-  repeated string category = 5;
+  string vendor = 2;
+  string path = 3;
+  repeated string category = 4;
 }
 
 message FindDriversResponse {
