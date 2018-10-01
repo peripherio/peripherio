@@ -24,3 +24,15 @@ impl<'a> From<&'a protos::Config> for Config {
     }
 }
 
+impl Into<protos::Config> for Config {
+    fn into(self) -> protos::Config {
+        let mut p_config = protos::Config::new();
+        for (k, v) in self {
+            let mut pair = protos::Config_Pair::new();
+            pair.set_key(k);
+            pair.set_value(rmps::to_vec(&v).unwrap());
+            p_config.mut_config().push(pair);
+        }
+        p_config
+    }
+}

@@ -51,14 +51,7 @@ impl PeripherioService {
             res.set_id(p_id);
             res.set_display_name(manager.get_device_name(&device).unwrap().clone());
             let config = manager.get_device_config(&device).unwrap();
-            let mut p_config = Config::new();
-            for (k, v) in config {
-                let mut pair = Config_Pair::new();
-                pair.set_key(k.clone());
-                pair.set_value(rmps::to_vec(v).unwrap());
-                p_config.mut_config().push(pair);
-            }
-            res.set_config(p_config);
+            res.set_config(config.clone().into());
             resp.mut_results().push(res);
         }
         resp
