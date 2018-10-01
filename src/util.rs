@@ -188,3 +188,4 @@ pub fn merge_schema_with_global(
         })
         .collect::<Result<LinkedHashMap<_, _>, Error>>()
 }
+
