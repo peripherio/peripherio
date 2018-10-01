@@ -38,6 +38,20 @@ fn main() {
                 .subcommand(SubCommand::with_name("ls")
                             .about("List drivers")
                             .arg(
+                                Arg::with_name("vendor")
+                                    .help("The vendor name to filter drivers with")
+                                    .takes_value(true)
+                                    .short("V")
+                                    .long("vendor")
+                            )
+                            .arg(
+                                Arg::with_name("category")
+                                    .help("The category to filter drivers with")
+                                    .takes_value(true)
+                                    .short("C")
+                                    .long("category")
+                            )
+                            .arg(
                                 Arg::with_name("config")
                                     .help("The Key-Value config pair to use")
                                     .takes_value(true)
@@ -50,6 +64,27 @@ fn main() {
         .subcommand(
             SubCommand::with_name("device")
                 .about("Manage devices")
+                .arg(
+                    Arg::with_name("driver-name")
+                        .help("The driver name to filter devices with")
+                        .takes_value(true)
+                        .short("d")
+                        .long("driver")
+                )
+                .arg(
+                    Arg::with_name("vendor")
+                        .help("The vendor name to filter devices with")
+                        .takes_value(true)
+                        .short("V")
+                        .long("vendor")
+                )
+                .arg(
+                    Arg::with_name("category")
+                        .help("The category to filter devices with")
+                        .takes_value(true)
+                        .short("C")
+                        .long("category")
+                )
                 .arg(
                     Arg::with_name("config")
                         .help("The Key-Value config pair to use")
