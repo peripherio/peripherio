@@ -1,4 +1,5 @@
 extern crate clap;
+extern crate failure;
 extern crate grpcio;
 extern crate peripherio;
 
