@@ -1,12 +1,13 @@
+use failure::Error;
 use rmps;
 use serde;
-use failure::Error;
 
-use protos::peripherio as protos;
 use error::MalformedConfigPairError;
+use protos::peripherio as protos;
 
 pub fn parse_config_list<'a, T>(confs: T) -> Result<protos::Config, Error>
-    where T: Iterator<Item=&'a str>
+where
+    T: Iterator<Item = &'a str>,
 {
     let mut res = protos::Config::new();
     for conf in confs {
@@ -15,7 +16,9 @@ pub fn parse_config_list<'a, T>(confs: T) -> Result<protos::Config, Error>
             pair.push("");
         }
         if pair.len() != 2 {
-            return Err(MalformedConfigPairError { config: conf.to_string() }.into());
+            return Err(MalformedConfigPairError {
+                config: conf.to_string(),
+            }.into());
         }
         let config_pair = if let Ok(num) = pair[1].parse::<i64>() {
             get_config_pair(pair[0], &num)

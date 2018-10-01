@@ -1,11 +1,10 @@
-use failure::Error;
 use clap::ArgMatches;
+use failure::Error;
 use serde_json;
 
-use protos::peripherio_grpc::PeripherioClient;
 use protos::peripherio::{Config, DriverSpecification, FindRequest};
+use protos::peripherio_grpc::PeripherioClient;
 use subcommand::util;
-
 
 pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
     let req: Config = matches

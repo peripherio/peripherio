@@ -16,12 +16,11 @@ use std::sync::{Arc, Mutex};
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
+use peripherio::config;
 use peripherio::device::{self, Device, DeviceManager};
 use peripherio::driver;
-use peripherio::config;
 use peripherio::protos::peripherio::*;
 use peripherio::protos::peripherio_grpc::{self, Peripherio};
-
 
 #[derive(Clone)]
 struct PeripherioService {
@@ -29,10 +28,7 @@ struct PeripherioService {
 }
 
 impl PeripherioService {
-    fn make_find_response(
-        &self,
-        devices: Vec<Device>
-    ) -> FindResponse {
+    fn make_find_response(&self, devices: Vec<Device>) -> FindResponse {
         let manager = self.manager.clone();
         let manager = manager.lock().unwrap();
 
@@ -95,7 +91,12 @@ impl Peripherio for PeripherioService {
         ctx.spawn(f)
     }
 
-    fn find_drivers(&self, ctx: RpcContext, req: FindRequest, sink: UnarySink<FindDriversResponse>) {
+    fn find_drivers(
+        &self,
+        ctx: RpcContext,
+        req: FindRequest,
+        sink: UnarySink<FindDriversResponse>,
+    ) {
         let config = config::Config::from(req.get_config());
         let spec = driver::DriverSpec::from(Some(req.get_spec()));
 
@@ -110,7 +111,14 @@ impl Peripherio for PeripherioService {
             let mut res = Driver::new();
             res.set_name(driver_data.name().clone());
             res.set_vendor(driver_data.vendor().clone().unwrap_or_default());
-            res.set_path(driver_data.path().clone().into_os_string().into_string().unwrap());
+            res.set_path(
+                driver_data
+                    .path()
+                    .clone()
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+            );
             for category in driver_data.category() {
                 res.mut_category().push(category.name().clone());
             }

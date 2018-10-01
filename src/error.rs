@@ -59,7 +59,7 @@ pub struct SchemaError {
 #[derive(Fail, Debug)]
 #[fail(display = "Malformed Config Pair: {:?}", config)]
 pub struct MalformedConfigPairError {
-    pub config: String
+    pub config: String,
 }
 
 impl From<json_schema::SchemaError> for SchemaError {

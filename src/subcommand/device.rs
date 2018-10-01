@@ -34,4 +34,3 @@ pub fn list(client: &PeripherioClient, matches: &ArgMatches, req: &Config) -> Re
     }
     Ok(())
 }
-

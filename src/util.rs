@@ -8,8 +8,8 @@ use serde_json::value::{Number, Value};
 
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
-use std::{mem, ptr, slice};
 use std::os::raw::c_char;
+use std::{mem, ptr, slice};
 
 pub unsafe fn alloc(len: usize) -> *mut u8 {
     let mut vec = Vec::<u8>::with_capacity(len);
@@ -188,4 +188,3 @@ pub fn merge_schema_with_global(
         })
         .collect::<Result<LinkedHashMap<_, _>, Error>>()
 }
-

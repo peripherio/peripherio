@@ -1,5 +1,5 @@
-use protos::peripherio as protos;
 use driver::driver::DriverData;
+use protos::peripherio as protos;
 
 pub struct DriverSpec {
     vendor: Option<String>,
