@@ -5,22 +5,12 @@ use serde_json;
 use protos::peripherio_grpc::PeripherioClient;
 use protos::peripherio::{Config, DriverSpecification, FindRequest};
 use subcommand::util;
-use error::MalformedConfigPairError;
 
 
 pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
     let mut req = Config::new();
     if let Some(confs) = matches.values_of("config") {
-        for conf in confs {
-            let mut pair: Vec<_> = conf.split("=").collect();
-            if pair.len() == 1 {
-                pair.push("");
-            }
-            if pair.len() != 2 {
-                return Err(MalformedConfigPairError { config: conf.to_string() }.into());
-            }
-            req.mut_config().push(util::get_config_pair(pair[0], pair[1]));
-        }
+        req = util::parse_config_list(confs)?;
     }
     Ok(if let Some(matches) = matches.subcommand_matches("ls") {
         list(client, matches, &req)?
