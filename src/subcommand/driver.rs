@@ -45,6 +45,7 @@ pub fn list(client: &PeripherioClient, matches: &ArgMatches, conf: &Config) -> R
     let spec = DriverSpecification::new();
     req.set_spec(spec);
     let reply = client.find_drivers(&req)?;
+    println!("NAME VENDOR PATH CATEGORIES");
     for res in reply.get_results() {
         let name = res.get_name();
         let vendor = res.get_vendor();
