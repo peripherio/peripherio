@@ -7,20 +7,20 @@ use protos::peripherio_grpc::PeripherioClient;
 use subcommand::util;
 
 pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
-    let req: Config = matches
-        .values_of("config")
-        .map(|confs| util::parse_config_list(confs))
-        .unwrap_or(Ok(Config::new()))?;
     Ok(if let Some(matches) = matches.subcommand_matches("ls") {
-        list(client, matches, &req)?
+        list(client, matches)?
     } else {
         println!("{}", matches.usage())
     })
 }
 
-pub fn list(client: &PeripherioClient, matches: &ArgMatches, conf: &Config) -> Result<(), Error> {
+pub fn list(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
+    let conf: Config = matches
+        .values_of("config")
+        .map(|confs| util::parse_config_list(confs))
+        .unwrap_or(Ok(Config::new()))?;
     let mut req = FindRequest::new();
-    req.set_config(conf.clone());
+    req.set_config(conf);
     let spec = DriverSpecification::new();
     req.set_spec(spec);
     let reply = client.find_drivers(&req)?;

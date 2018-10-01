@@ -35,16 +35,17 @@ fn main() {
         .subcommand(
             SubCommand::with_name("driver")
                 .about("Manage drivers")
-                .arg(
-                    Arg::with_name("config")
-                        .help("The Key-Value config pair to use")
-                        .takes_value(true)
-                        .short("c")
-                        .long("config")
-                        .multiple(true)
-                        .number_of_values(1),
-                )
-                .subcommand(SubCommand::with_name("ls").about("List drivers")),
+                .subcommand(SubCommand::with_name("ls")
+                            .about("List drivers")
+                            .arg(
+                                Arg::with_name("config")
+                                    .help("The Key-Value config pair to use")
+                                    .takes_value(true)
+                                    .short("c")
+                                    .long("config")
+                                    .multiple(true)
+                                    .number_of_values(1),
+                            )),
         )
         .subcommand(
             SubCommand::with_name("device")
