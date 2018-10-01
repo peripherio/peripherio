@@ -17,7 +17,14 @@ pub fn parse_config_list<'a, T>(confs: T) -> Result<protos::Config, Error>
         if pair.len() != 2 {
             return Err(MalformedConfigPairError { config: conf.to_string() }.into());
         }
-        res.mut_config().push(get_config_pair(pair[0], pair[1]));
+        let config_pair = if let Ok(num) = pair[1].parse::<i64>() {
+            get_config_pair(pair[0], &num)
+        } else if let Ok(num) = pair[1].parse::<f64>() {
+            get_config_pair(pair[0], &num)
+        } else {
+            get_config_pair(pair[0], pair[1])
+        };
+        res.mut_config().push(config_pair);
     }
     Ok(res)
 }
