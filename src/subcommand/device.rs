@@ -4,15 +4,15 @@ use rmps;
 use serde_json;
 
 use error::MalformedConfigPairError;
-use protos::peripherio::{Config, DriverSpecification, FindRequest};
+use protos::peripherio as protos;
 use protos::peripherio_grpc::PeripherioClient;
 use subcommand::util;
 
 pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
-    let req: Config = matches
+    let req: protos::Config = matches
         .values_of("config")
         .map(|confs| util::parse_config_list(confs))
-        .unwrap_or(Ok(Config::new()))?;
+        .unwrap_or(Ok(protos::Config::new()))?;
     let spec = util::get_driver_spec_from_matches(matches);
     Ok(if let Some(matches) = matches.subcommand_matches("ls") {
         list(client, matches, req, spec)?
@@ -21,8 +21,8 @@ pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error
     })
 }
 
-pub fn list(client: &PeripherioClient, matches: &ArgMatches, conf: Config, spec: DriverSpecification) -> Result<(), Error> {
-    let mut req = FindRequest::new();
+pub fn list(client: &PeripherioClient, matches: &ArgMatches, conf: protos::Config, spec: protos::DriverSpecification) -> Result<(), Error> {
+    let mut req = protos::FindRequest::new();
     req.set_config(conf);
     req.set_spec(spec);
     let reply = client.find(&req)?;

@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use failure::Error;
 use serde_json;
 
-use protos::peripherio::{Config, DriverSpecification, FindRequest};
+use protos::peripherio as protos;
 use protos::peripherio_grpc::PeripherioClient;
 use subcommand::util;
 
@@ -15,11 +15,11 @@ pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error
 }
 
 pub fn list(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
-    let conf: Config = matches
+    let conf: protos::Config = matches
         .values_of("config")
         .map(|confs| util::parse_config_list(confs))
-        .unwrap_or(Ok(Config::new()))?;
-    let mut req = FindRequest::new();
+        .unwrap_or(Ok(protos::Config::new()))?;
+    let mut req = protos::FindRequest::new();
     req.set_config(conf);
     let spec = util::get_driver_spec_from_matches(matches);
     req.set_spec(spec);
