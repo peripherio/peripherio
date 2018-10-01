@@ -17,7 +17,8 @@ use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
 use peripherio::device::{self, DeviceManager};
-use peripherio::driver::{Driver, DriverSpec};
+use peripherio::driver;
+use peripherio::config;
 use peripherio::protos::peripherio::*;
 use peripherio::protos::peripherio_grpc::{self, Peripherio};
 
@@ -30,7 +31,7 @@ impl PeripherioService {
     fn convert_config(
         &self,
         p_config: &Config
-    ) -> HashMap<String, serde_json::value::Value> {
+    ) -> config::Config {
         p_config
             .get_config()
             .iter()
@@ -46,7 +47,7 @@ impl PeripherioService {
     fn convert_spec(
         &self,
         p_spec: Option<&DriverSpecification>,
-    ) -> DriverSpec {
+    ) -> driver::DriverSpec {
         if let Some(p) = p_spec {
             let empty_or = |v| {
                 if v == "" {
@@ -58,9 +59,9 @@ impl PeripherioService {
             let vendor = p.get_vendor().to_string();
             let category = p.get_category().to_string();
             let name = p.get_name().to_string();
-            DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
+            driver::DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
         } else {
-            DriverSpec::new(None, None, None)
+            driver::DriverSpec::new(None, None, None)
         }
     }
 
