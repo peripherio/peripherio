@@ -22,28 +22,13 @@ use peripherio::config;
 use peripherio::protos::peripherio::*;
 use peripherio::protos::peripherio_grpc::{self, Peripherio};
 
+
 #[derive(Clone)]
 struct PeripherioService {
     manager: Arc<Mutex<DeviceManager>>,
 }
 
 impl PeripherioService {
-    fn convert_config(
-        &self,
-        p_config: &Config
-    ) -> config::Config {
-        p_config
-            .get_config()
-            .iter()
-            .map(|pair| {
-                (
-                    pair.get_key().to_string(),
-                    rmps::from_slice(&pair.get_value()[..]).unwrap(),
-                )
-            })
-            .collect()
-    }
-
     fn convert_spec(
         &self,
         p_spec: Option<&DriverSpecification>,
@@ -70,7 +55,7 @@ impl PeripherioService {
         p_config: &Config,
         p_spec: Option<&DriverSpecification>,
     ) -> FindResponse {
-        let config = self.convert_config(p_config);
+        let config = config::Config::from(p_config);
         let spec = self.convert_spec(p_spec);
 
         let manager = self.manager.clone();
