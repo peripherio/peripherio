@@ -31,7 +31,7 @@ jobs:
               peripherio/peripherio:latest \
               peripherio/peripherio:armhf \
               peripherio/peripherio:amd64
-            docker manifest annotate --os linux --arch arm --variant v8 peripherio/peripherio:latest peripherio/peripherio:armhf
+            docker manifest annotate --os linux --arch arm --variant v7 peripherio/peripherio:latest peripherio/peripherio:armhf
             docker manifest annotate --os linux --arch amd64 peripherio/peripherio:latest peripherio/peripherio:amd64
       - run:
           name: Push the manifest
