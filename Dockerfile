@@ -18,7 +18,7 @@ RUN ln -s /usr/bin/g++ /usr/bin/musl-g++
 
 COPY . ./
 
-RUN rustup target add $CARGO_TARGET
+RUN [ "$CARGO_TARGET" = "x86_64-unknown-linux-gnu" ] || rustup target add $CARGO_TARGET
 RUN cargo build --release --target=${CARGO_TARGET}
 
 FROM debian@${BASE_DIGEST}
