@@ -95,6 +95,33 @@ impl Peripherio for PeripherioService {
         ctx.spawn(f)
     }
 
+    fn find_drivers(&self, ctx: RpcContext, req: FindRequest, sink: UnarySink<FindDriversResponse>) {
+        let config = config::Config::from(req.get_config());
+        let spec = driver::DriverSpec::from(Some(req.get_spec()));
+
+        let manager = self.manager.clone();
+        let manager = manager.lock().unwrap();
+
+        let drivers = manager.driver_manager().suitable_drivers(&spec, &config);
+
+        let mut resp = FindDriversResponse::new();
+        for driver in drivers {
+            let driver_data = manager.driver_manager().get_data(&driver).unwrap();
+            let mut res = Driver::new();
+            res.set_name(driver_data.name().clone());
+            res.set_vendor(driver_data.vendor().clone().unwrap_or_default());
+            res.set_path(driver_data.path().clone().into_os_string().into_string().unwrap());
+            for category in driver_data.category() {
+                res.mut_category().push(category.name().clone());
+            }
+            resp.mut_results().push(res);
+        }
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
+
     fn dispatch(&self, ctx: RpcContext, req: DispatchRequest, sink: UnarySink<DispatchResponse>) {
         let resp = {
             let device_id = req.get_device();

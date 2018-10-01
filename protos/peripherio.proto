@@ -14,7 +14,7 @@ service Peripherio {
   rpc PingDevice(PingRequest) returns (PingResponse) {}
 
   /* Driver management calls */
-  rpc FindDrivers(DriverSpecification) returns (FindDriversResponse) {}
+  rpc FindDrivers(FindRequest) returns (FindDriversResponse) {}
 
   /* Command Dispatchment calls */
   rpc Dispatch(DispatchRequest) returns (DispatchResponse) {}
