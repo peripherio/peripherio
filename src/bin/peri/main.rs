@@ -29,6 +29,18 @@ fn main() {
                                .value_name("PORT")
                                .help("Sets the peripherio server port")
                                .takes_value(true))
+                          .subcommand(SubCommand::with_name("driver")
+                                      .about("Manage drivers")
+                                      .arg(Arg::with_name("config")
+                                           .help("The Key-Value config pair to use")
+                                           .takes_value(true)
+                                           .short("c")
+                                           .long("config")
+                                           .multiple(true)
+                                           .number_of_values(1)
+                                           )
+                                      .subcommand(SubCommand::with_name("ls")
+                                                  .about("List drivers")))
                           .subcommand(SubCommand::with_name("device")
                                       .about("Manage devices")
                                       .arg(Arg::with_name("config")
@@ -54,6 +66,8 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("device") {
         subcommand::device::main(&client, matches).unwrap();
+    } else if let Some(matches) = matches.subcommand_matches("driver") {
+        subcommand::driver::main(&client, matches).unwrap();
     } else {
         println!("{}", matches.usage());
     }
