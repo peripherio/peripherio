@@ -1,9 +1,9 @@
-ARG TARGET_TAG=x86_64-musl
+ARG TARGET_TAG=x86
 ARG ALPINE_DIGEST=sha256:02892826401a9d18f0ea01f8a2f35d328ef039db4e1edcc45c630314a0457d5b
 
-FROM messense/rust-musl-cross:${TARGET_TAG}
+FROM posborne/rust-cross:${TARGET_TAG}
 
-ARG CARGO_TARGET=x86_64-unknown-linux-musl
+ARG CARGO_TARGET=x86_64-unknown-linux-gnu
 
 RUN apt-get update
 RUN apt-get -y --no-install-recommends install cmake build-essential golang unzip wget
@@ -22,7 +22,7 @@ RUN cargo build --release --target=${CARGO_TARGET}
 
 FROM alpine@${ALPINE_DIGEST}
 
-ARG CARGO_TARGET=x86_64-unknown-linux-musl
+ARG CARGO_TARGET=x86_64-unknown-linux-gnu
 
 COPY --from=0 /home/rust/src/target/${CARGO_TARGET}/release/peripherio /usr/bin
 
