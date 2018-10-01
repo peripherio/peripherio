@@ -16,7 +16,7 @@ use std::sync::{Arc, Mutex};
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
-use peripherio::device::{self, DeviceManager};
+use peripherio::device::{self, Device, DeviceManager};
 use peripherio::driver;
 use peripherio::config;
 use peripherio::protos::peripherio::*;
@@ -29,19 +29,12 @@ struct PeripherioService {
 }
 
 impl PeripherioService {
-    fn find_with_spec(
+    fn make_find_response(
         &self,
-        p_config: &Config,
-        p_spec: Option<&DriverSpecification>,
+        devices: Vec<Device>
     ) -> FindResponse {
-        let config = config::Config::from(p_config);
-        let spec = driver::DriverSpec::from(p_spec);
-
         let manager = self.manager.clone();
-        let mut manager = manager.lock().unwrap();
-        let drivers = manager.driver_manager().suitable_drivers(&spec, &config);
-
-        let devices = manager.detect(config, Some(&drivers)).unwrap();
+        let manager = manager.lock().unwrap();
 
         let mut resp = FindResponse::new();
         for device in devices {
@@ -55,6 +48,24 @@ impl PeripherioService {
             resp.mut_results().push(res);
         }
         resp
+    }
+
+    fn find_with_spec(
+        &self,
+        p_config: &Config,
+        p_spec: Option<&DriverSpecification>,
+    ) -> FindResponse {
+        let config = config::Config::from(p_config);
+        let spec = driver::DriverSpec::from(p_spec);
+
+        let devices = {
+            let manager = self.manager.clone();
+            let mut manager = manager.lock().unwrap();
+            let drivers = manager.driver_manager().suitable_drivers(&spec, &config);
+            manager.detect(config, Some(&drivers)).unwrap()
+        };
+
+        self.make_find_response(devices)
     }
 }
 
