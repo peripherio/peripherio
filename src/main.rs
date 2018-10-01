@@ -27,12 +27,11 @@ struct PeripherioService {
 }
 
 impl PeripherioService {
-    fn find_with_spec(
+    fn convert_config(
         &self,
-        p_config: &Config,
-        p_spec: Option<&DriverSpecification>,
-    ) -> FindResponse {
-        let config: HashMap<String, serde_json::value::Value> = p_config
+        p_config: &Config
+    ) -> HashMap<String, serde_json::value::Value> {
+        p_config
             .get_config()
             .iter()
             .map(|pair| {
@@ -41,8 +40,14 @@ impl PeripherioService {
                     rmps::from_slice(&pair.get_value()[..]).unwrap(),
                 )
             })
-            .collect();
-        let spec = if let Some(p) = p_spec {
+            .collect()
+    }
+
+    fn convert_spec(
+        &self,
+        p_spec: Option<&DriverSpecification>,
+    ) -> DriverSpec {
+        if let Some(p) = p_spec {
             let empty_or = |v| {
                 if v == "" {
                     None
@@ -56,10 +61,21 @@ impl PeripherioService {
             DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
         } else {
             DriverSpec::new(None, None, None)
-        };
+        }
+    }
+
+    fn find_with_spec(
+        &self,
+        p_config: &Config,
+        p_spec: Option<&DriverSpecification>,
+    ) -> FindResponse {
+        let config = self.convert_config(p_config);
+        let spec = self.convert_spec(p_spec);
+
         let manager = self.manager.clone();
         let mut manager = manager.lock().unwrap();
-        let drivers: Vec<Driver> = manager.driver_manager().suitable_drivers(&spec, &config);
+        let drivers = manager.driver_manager().suitable_drivers(&spec, &config);
+
         let devices = manager.detect(config, Some(&drivers)).unwrap();
 
         let mut resp = FindResponse::new();
