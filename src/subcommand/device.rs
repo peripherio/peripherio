@@ -1,18 +1,18 @@
-use failure::Error;
 use clap::ArgMatches;
+use failure::Error;
 use rmps;
 use serde_json;
 
-use protos::peripherio_grpc::PeripherioClient;
-use protos::peripherio::Config;
-use subcommand::util;
 use error::MalformedConfigPairError;
+use protos::peripherio::Config;
+use protos::peripherio_grpc::PeripherioClient;
+use subcommand::util;
 
 pub fn main(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error> {
-    let mut req = Config::new();
-    if let Some(confs) = matches.values_of("config") {
-        req = util::parse_config_list(confs)?;
-    }
+    let req: Config = matches
+        .values_of("config")
+        .map(|confs| util::parse_config_list(confs))
+        .unwrap_or(Ok(Config::new()))?;
     Ok(if let Some(matches) = matches.subcommand_matches("ls") {
         list(client, matches, &req)?
     } else {
