@@ -4,5 +4,5 @@ driver.so: mpu6050.c peripherio.gen.h
 
 peripherio.gen.h: driver.yml
 	PERIPHERIO_DRIVER_PATH=$(realpath ../) \
-	PERIPHERIO_CATEGORY_PATH=$(realpath ../../category) \
+	PERIPHERIO_CATEGORY_PATH=$(realpath ../../categories) \
 	../../../target/debug/codegen
