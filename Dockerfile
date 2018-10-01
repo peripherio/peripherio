@@ -1,7 +1,7 @@
-ARG TARGET_TAG=x86
 ARG BASE_DIGEST=sha256:a8c1702fe60da76824a7604ae3a3f1db29262b9099d3a759e169a90cb90ef9e3
+ARG CARGO_TARGET=x86_64-unknown-linux-gnu
 
-FROM posborne/rust-cross:${TARGET_TAG}
+FROM rust:1.29.1-stretch
 
 ARG CARGO_TARGET=x86_64-unknown-linux-gnu
 
@@ -18,6 +18,7 @@ RUN ln -s /usr/bin/g++ /usr/bin/musl-g++
 
 COPY . ./
 
+RUN rustup target add $CARGO_TARGET
 RUN cargo build --release --target=${CARGO_TARGET}
 
 FROM debian@${BASE_DIGEST}
