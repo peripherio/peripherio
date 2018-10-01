@@ -1,5 +1,5 @@
 ARG TARGET_TAG=x86
-ARG ALPINE_DIGEST=sha256:02892826401a9d18f0ea01f8a2f35d328ef039db4e1edcc45c630314a0457d5b
+ARG BASE_DIGEST=sha256:a8c1702fe60da76824a7604ae3a3f1db29262b9099d3a759e169a90cb90ef9e3
 
 FROM posborne/rust-cross:${TARGET_TAG}
 
@@ -20,7 +20,7 @@ COPY . ./
 
 RUN cargo build --release --target=${CARGO_TARGET}
 
-FROM alpine@${ALPINE_DIGEST}
+FROM debian@${BASE_DIGEST}
 
 ARG CARGO_TARGET=x86_64-unknown-linux-gnu
 
