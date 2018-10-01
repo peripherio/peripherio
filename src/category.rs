@@ -11,7 +11,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-pub const CATEGORY_ENV: &str = "PERIPHERIO_CATEGORY";
+pub const CATEGORY_ENV: &str = "PERIPHERIO_CATEGORY_PATH";
 pub const CATEGORY_FILE: &str = "category.yml";
 
 #[derive(Deserialize, Clone)]

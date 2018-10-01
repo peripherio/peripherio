@@ -26,8 +26,8 @@ ARG CARGO_TARGET=x86_64-unknown-linux-musl
 
 COPY --from=0 /home/rust/src/target/${CARGO_TARGET}/release/peripherio /usr/bin
 
-ENV PERIPHERIO_DRIVER /lib/peripherio/drivers
-ENV PERIPHERIO_CATEGORY /lib/peripherio/categories
+ENV PERIPHERIO_DRIVER_PATH /lib/peripherio/drivers
+ENV PERIPHERIO_CATEGORY_PATH /lib/peripherio/categories
 ENV PERIPHERIO_HOST 0.0.0.0
 ENV PERIPHERIO_PORT 57601
 

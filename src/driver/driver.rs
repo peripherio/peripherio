@@ -17,7 +17,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::slice;
 
-pub const DRIVER_ENV: &str = "PERIPHERIO_DRIVER";
+pub const DRIVER_ENV: &str = "PERIPHERIO_DRIVER_PATH";
 pub const DRIVER_FILE: &str = "driver.yml";
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
