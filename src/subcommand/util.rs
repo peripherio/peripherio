@@ -1,6 +1,7 @@
 use failure::Error;
 use rmps;
 use serde;
+use clap::ArgMatches;
 
 use error::MalformedConfigPairError;
 use protos::peripherio as protos;
@@ -30,6 +31,20 @@ where
         res.mut_config().push(config_pair);
     }
     Ok(res)
+}
+
+pub fn get_driver_spec_from_matches(matches: &ArgMatches) -> protos::DriverSpecification {
+    let mut spec = protos::DriverSpecification::new();
+    if let Some(name) = matches.value_of("driver-name") {
+        spec.set_name(name.to_string());
+    }
+    if let Some(vendor) = matches.value_of("vendor") {
+        spec.set_vendor(vendor.to_string());
+    }
+    if let Some(category) = matches.value_of("category") {
+        spec.set_category(category.to_string());
+    }
+    spec
 }
 
 pub fn get_config_pair<T: ?Sized>(k: &str, v: &T) -> protos::Config_Pair

@@ -21,7 +21,7 @@ pub fn list(client: &PeripherioClient, matches: &ArgMatches) -> Result<(), Error
         .unwrap_or(Ok(Config::new()))?;
     let mut req = FindRequest::new();
     req.set_config(conf);
-    let spec = DriverSpecification::new();
+    let spec = util::get_driver_spec_from_matches(matches);
     req.set_spec(spec);
     let reply = client.find_drivers(&req)?;
     println!("NAME VENDOR PATH CATEGORIES");
