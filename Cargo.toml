@@ -5,14 +5,6 @@ authors = ["coord.e <me@coord-e.com>"]
 build = "build.rs"
 license = "MIT/Apache-2.0"
 
-[[example]]
-name = "client"
-path = "examples/client/client.rs"
-
-[[example]]
-name = "load_library"
-path = "examples/lib/load_library.rs"
-
 [dependencies]
 futures = "0.1.23"
 protobuf = "2.0.4"
