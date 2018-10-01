@@ -29,34 +29,13 @@ struct PeripherioService {
 }
 
 impl PeripherioService {
-    fn convert_spec(
-        &self,
-        p_spec: Option<&DriverSpecification>,
-    ) -> driver::DriverSpec {
-        if let Some(p) = p_spec {
-            let empty_or = |v| {
-                if v == "" {
-                    None
-                } else {
-                    Some(v)
-                }
-            };
-            let vendor = p.get_vendor().to_string();
-            let category = p.get_category().to_string();
-            let name = p.get_name().to_string();
-            driver::DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
-        } else {
-            driver::DriverSpec::new(None, None, None)
-        }
-    }
-
     fn find_with_spec(
         &self,
         p_config: &Config,
         p_spec: Option<&DriverSpecification>,
     ) -> FindResponse {
         let config = config::Config::from(p_config);
-        let spec = self.convert_spec(p_spec);
+        let spec = driver::DriverSpec::from(p_spec);
 
         let manager = self.manager.clone();
         let mut manager = manager.lock().unwrap();

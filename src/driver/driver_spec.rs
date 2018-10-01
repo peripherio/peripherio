@@ -1,3 +1,4 @@
+use protos::peripherio as protos;
 use driver::driver::DriverData;
 
 pub struct DriverSpec {
@@ -37,5 +38,31 @@ impl DriverSpec {
                 .as_ref()
                 .map(|n| Some(n) == driver.vendor().as_ref())
                 .unwrap_or(true)
+    }
+}
+
+impl<'a> From<&'a protos::DriverSpecification> for DriverSpec {
+    fn from(p_spec: &'a protos::DriverSpecification) -> Self {
+        let empty_or = |v| {
+            if v == "" {
+                None
+            } else {
+                Some(v)
+            }
+        };
+        let vendor = p_spec.get_vendor().to_string();
+        let category = p_spec.get_category().to_string();
+        let name = p_spec.get_name().to_string();
+        DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
+    }
+}
+
+impl<'a> From<Option<&'a protos::DriverSpecification>> for DriverSpec {
+    fn from(p_spec: Option<&'a protos::DriverSpecification>) -> Self {
+        if let Some(p) = p_spec {
+            DriverSpec::from(p)
+        } else {
+            DriverSpec::new(None, None, None)
+        }
     }
 }
