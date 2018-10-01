@@ -19,6 +19,7 @@ jobs:
           command: |
             docker build -t peripherio/peripherio:amd64 --build-arg CARGO_TARGET=x86_64-unknown-linux-gnu --build-arg BASE_DIGEST=sha256:a8c1702fe60da76824a7604ae3a3f1db29262b9099d3a759e169a90cb90ef9e3 .
             docker build -t peripherio/peripherio:armhf --build-arg CARGO_TARGET=arm-unknown-linux-gnueabi --build-arg BASE_DIGEST=sha256:98f3a3dae86e8a8cd87f1166d5464659c6eb0eceff295579ffde6b603c708e7e .
+          no_output_timeout: 20m
       - run:
           name: Push the image
           command: |
