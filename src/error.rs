@@ -56,6 +56,12 @@ pub struct SchemaError {
     pub error: json_schema::SchemaError,
 }
 
+#[derive(Fail, Debug)]
+#[fail(display = "Malformed Config Pair: {:?}", config)]
+pub struct MalformedConfigPairError {
+    pub config: String
+}
+
 impl From<json_schema::SchemaError> for SchemaError {
     fn from(error: json_schema::SchemaError) -> Self {
         SchemaError { error }
