@@ -8,11 +8,16 @@ pub mod protos;
 pub mod resolve;
 pub mod util;
 
+pub mod subcommand;
+
+extern crate clap;
 extern crate futures;
 extern crate grpcio;
 extern crate linked_hash_map;
 extern crate protobuf;
 extern crate rand;
+extern crate rmp_serde as rmps;
+extern crate serde;
 extern crate serde_yaml;
 extern crate valico;
 

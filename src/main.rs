@@ -16,8 +16,9 @@ use std::sync::{Arc, Mutex};
 use futures::Future;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
-use peripherio::device::{self, DeviceManager};
-use peripherio::driver::{Driver, DriverSpec};
+use peripherio::config;
+use peripherio::device::{self, Device, DeviceManager};
+use peripherio::driver;
 use peripherio::protos::peripherio::*;
 use peripherio::protos::peripherio_grpc::{self, Peripherio};
 
@@ -27,40 +28,9 @@ struct PeripherioService {
 }
 
 impl PeripherioService {
-    fn find_with_spec(
-        &self,
-        p_config: &Config,
-        p_spec: Option<&DriverSpecification>,
-    ) -> FindResponse {
-        let config: HashMap<String, serde_json::value::Value> = p_config
-            .get_config()
-            .iter()
-            .map(|pair| {
-                (
-                    pair.get_key().to_string(),
-                    rmps::from_slice(&pair.get_value()[..]).unwrap(),
-                )
-            })
-            .collect();
-        let spec = if let Some(p) = p_spec {
-            let empty_or = |v| {
-                if v == "" {
-                    None
-                } else {
-                    Some(v)
-                }
-            };
-            let vendor = p.get_vendor().to_string();
-            let category = p.get_category().to_string();
-            let name = p.get_name().to_string();
-            DriverSpec::new(empty_or(vendor), empty_or(category), empty_or(name))
-        } else {
-            DriverSpec::new(None, None, None)
-        };
+    fn make_find_response(&self, devices: Vec<Device>) -> FindResponse {
         let manager = self.manager.clone();
-        let mut manager = manager.lock().unwrap();
-        let drivers: Vec<Driver> = manager.driver_manager().suitable_drivers(&spec, &config);
-        let devices = manager.detect(config, Some(&drivers)).unwrap();
+        let manager = manager.lock().unwrap();
 
         let mut resp = FindResponse::new();
         for device in devices {
@@ -70,17 +40,28 @@ impl PeripherioService {
             res.set_id(p_id);
             res.set_display_name(manager.get_device_name(&device).unwrap().clone());
             let config = manager.get_device_config(&device).unwrap();
-            let mut p_config = Config::new();
-            for (k, v) in config {
-                let mut pair = Config_Pair::new();
-                pair.set_key(k.clone());
-                pair.set_value(rmps::to_vec(v).unwrap());
-                p_config.mut_config().push(pair);
-            }
-            res.set_config(p_config);
+            res.set_config(config.clone().into());
             resp.mut_results().push(res);
         }
         resp
+    }
+
+    fn find_with_spec(
+        &self,
+        p_config: &Config,
+        p_spec: Option<&DriverSpecification>,
+    ) -> FindResponse {
+        let config = config::Config::from(p_config);
+        let spec = driver::DriverSpec::from(p_spec);
+
+        let devices = {
+            let manager = self.manager.clone();
+            let mut manager = manager.lock().unwrap();
+            let drivers = manager.driver_manager().suitable_drivers(&spec, &config);
+            manager.detect(config, Some(&drivers)).unwrap()
+        };
+
+        self.make_find_response(devices)
     }
 }
 
@@ -104,6 +85,45 @@ impl Peripherio for PeripherioService {
     fn ping_device(&self, ctx: RpcContext, req: PingRequest, sink: UnarySink<PingResponse>) {
         let mut resp = PingResponse::new();
         resp.set_alive(true);
+        let f = sink
+            .success(resp)
+            .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
+    }
+
+    fn find_drivers(
+        &self,
+        ctx: RpcContext,
+        req: FindRequest,
+        sink: UnarySink<FindDriversResponse>,
+    ) {
+        let config = config::Config::from(req.get_config());
+        let spec = driver::DriverSpec::from(Some(req.get_spec()));
+
+        let manager = self.manager.clone();
+        let manager = manager.lock().unwrap();
+
+        let drivers = manager.driver_manager().suitable_drivers(&spec, &config);
+
+        let mut resp = FindDriversResponse::new();
+        for driver in drivers {
+            let driver_data = manager.driver_manager().get_data(&driver).unwrap();
+            let mut res = Driver::new();
+            res.set_name(driver_data.name().clone());
+            res.set_vendor(driver_data.vendor().clone().unwrap_or_default());
+            res.set_path(
+                driver_data
+                    .path()
+                    .clone()
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+            );
+            for category in driver_data.category() {
+                res.mut_category().push(category.name().clone());
+            }
+            resp.mut_results().push(res);
+        }
         let f = sink
             .success(resp)
             .map_err(move |e| println!("failed to reply {:?}: {:?}", req, e));

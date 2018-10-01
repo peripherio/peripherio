@@ -29,6 +29,7 @@ lazy_static = "1.1.0"
 grpcio = "0.3"
 rand = "0.5.5"
 ctrlc = { version = "3.0", features = ["termination"] }
+clap = "2.32.0"
 
 [build-dependencies]
 protoc-grpcio = "0.2.0"
